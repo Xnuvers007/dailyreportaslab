@@ -1,10 +1,27 @@
 <?php
 require_once __DIR__ . '/../config/security.php';
 require_once __DIR__ . '/../config/auth.php';
+require_once __DIR__ . '/../config/logger.php';
 
 $user = current_user();
 $flash = get_flash();
 $current_page = basename($_SERVER['PHP_SELF']);
+
+// Audit Trail: Catat otomatis fitur/halaman yang dibuka pengguna
+$page_action_map = [
+    'index.php'         => ['action' => 'NAVIGATE_DASHBOARD', 'desc' => 'Membuka Dashboard Inventaris Lab'],
+    'riwayat.php'       => ['action' => 'NAVIGATE_RIWAYAT',   'desc' => 'Melihat Riwayat Arsip Laporan'],
+    'buat-laporan.php'  => ['action' => 'NAVIGATE_INPUT',     'desc' => 'Membuka Form Input Laporan Harian'],
+    'detail.php'        => ['action' => 'NAVIGATE_DETAIL',    'desc' => 'Melihat Detail Laporan ID #' . ((int)($_GET['id'] ?? 0))],
+    'edit-laporan.php'  => ['action' => 'NAVIGATE_EDIT',      'desc' => 'Membuka Form Edit Laporan ID #' . ((int)($_GET['id'] ?? 0))],
+    'kelola-aslab.php'  => ['action' => 'NAVIGATE_USERS',     'desc' => 'Membuka Halaman Kelola Akun Aslab'],
+    'log-aktivitas.php' => ['action' => 'NAVIGATE_LOGS',      'desc' => 'Membuka Pusat Audit & Log Aktivitas'],
+];
+
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET' && isset($page_action_map[$current_page])) {
+    $navInfo = $page_action_map[$current_page];
+    record_log($navInfo['action'], $navInfo['desc'], 'INFO');
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -72,6 +89,11 @@ $current_page = basename($_SERVER['PHP_SELF']);
                                 <i class="fa-solid fa-users-gear me-1"></i> Kelola Aslab
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link <?= $current_page == 'log-aktivitas.php' ? 'active' : '' ?>" href="log-aktivitas.php">
+                                <i class="fa-solid fa-shield-halved me-1"></i> Log Aktivitas
+                            </a>
+                        </li>
                     <?php endif; ?>
                 </ul>
                 
@@ -97,6 +119,11 @@ $current_page = basename($_SERVER['PHP_SELF']);
                                     <li>
                                         <a class="dropdown-item" href="kelola-aslab.php">
                                             <i class="fa-solid fa-user-plus me-1 text-primary"></i> Pendaftaran & Akun Aslab
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="log-aktivitas.php">
+                                            <i class="fa-solid fa-shield-halved me-1 text-info"></i> Log & Audit Aktivitas (30 Hari)
                                         </a>
                                     </li>
                                 <?php endif; ?>

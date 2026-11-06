@@ -272,9 +272,14 @@
     background: linear-gradient(135deg, var(--unpam-orange) 0%, #c2410c 100%);
     color: #ffffff;
     font-weight: 600;
-    padding: 0.35rem 0.7rem;
+    padding: 0.35rem 0.75rem;
     border-radius: 2rem;
     font-size: 0.75rem;
     box-shadow: 0 2px 6px var(--unpam-orange-glow);
+    white-space: nowrap !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
 }
 

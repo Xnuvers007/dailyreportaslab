@@ -2,19 +2,20 @@
 
     <!-- Footer -->
     <footer class="border-top py-3 mt-auto" style="background-color: var(--navbar-bg);">
-        <div class="container text-center text-muted small">
-            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
-                <div>
-                    <i class="fa-solid fa-laptop-code me-1 text-primary"></i> 
-                    Sistem Laporan Harian Asisten Laboratorium &copy; <?= date('Y') ?> &bull; 
-                    <span class="badge-unpam ms-1">Universitas Pamulang</span>
+        <div class="container text-muted small">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 text-center text-md-start">
+                <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-start gap-1">
+                    <i class="fa-solid fa-laptop-code text-primary me-1"></i> 
+                    <span>Sistem Laporan Harian Aslab &copy; <?= date('Y') ?></span>
+                    <span class="d-none d-sm-inline opacity-50">&bull;</span>
+                    <span class="badge-unpam">Universitas Pamulang</span>
                 </div>
-                <div class="d-flex align-items-center gap-3">
+                <div class="d-flex flex-wrap align-items-center justify-content-center gap-2 mt-1 mt-md-0">
                     <span class="badge bg-success-subtle text-success border border-success-subtle">
                         <i class="fa-solid fa-shield-halved me-1"></i> Aman & Terenkripsi
                     </span>
-                    <span class="text-secondary">
-                        <i class="fa-solid fa-server me-1"></i> InfinityFree Ready
+                    <span class="text-secondary small">
+                        <i class="fa-solid fa-server me-1"></i> Server Ready
                     </span>
                 </div>
             </div>

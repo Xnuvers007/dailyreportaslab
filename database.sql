@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS `laporan` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `user_id` INT NULL,
   `tanggal` DATE NOT NULL,
-  `shift` ENUM('Pagi', 'Siang', 'Sore', 'Malam') NOT NULL DEFAULT 'Pagi',
+  `shift` VARCHAR(50) NOT NULL DEFAULT 'Pagi',
   `petugas_nama` VARCHAR(100) NOT NULL,
   
   -- Inventaris Kabel Roll
@@ -50,6 +50,28 @@ CREATE TABLE IF NOT EXISTS `laporan` (
   INDEX `idx_tanggal` (`tanggal`),
   INDEX `idx_shift` (`shift`),
   CONSTRAINT `fk_laporan_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+-- Table structure for table `activity_logs` (Audit Trail)
+-- Retensi otomatis 30 hari & mendukung export
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `activity_logs` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `user_id` INT NULL,
+  `username` VARCHAR(100) NOT NULL,
+  `action` VARCHAR(50) NOT NULL,
+  `description` TEXT NOT NULL,
+  `ip_address` VARCHAR(45) NOT NULL,
+  `user_agent` VARCHAR(255) NULL,
+  `url_path` VARCHAR(255) NULL,
+  `method` VARCHAR(10) NOT NULL DEFAULT 'GET',
+  `status` VARCHAR(20) NOT NULL DEFAULT 'INFO',
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX `idx_action` (`action`),
+  INDEX `idx_created_at` (`created_at`),
+  INDEX `idx_status` (`status`),
+  CONSTRAINT `fk_log_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------

@@ -203,6 +203,9 @@ require_once __DIR__ . '/includes/header.php';
                 <a href="riwayat.php?shift=Malam" class="filter-pill <?= $shift === 'Malam' ? 'active' : '' ?>">
                     <i class="fa-solid fa-moon text-info"></i> Shift Malam (16:00 - 21:30)
                 </a>
+                <a href="riwayat.php?shift=1+Hari" class="filter-pill <?= ($shift === '1 Hari' || $shift === 'Full Day') ? 'active' : '' ?>">
+                    <i class="fa-solid fa-clock-rotate-left text-success"></i> Shift 1 Hari (07:00 - 21:30)
+                </a>
             </div>
 
             <!-- Detailed Search Form -->
@@ -222,6 +225,7 @@ require_once __DIR__ . '/includes/header.php';
                         <option value="Pagi" <?= $shift === 'Pagi' ? 'selected' : '' ?>>Pagi (07:00 - 10:00)</option>
                         <option value="Siang" <?= $shift === 'Siang' ? 'selected' : '' ?>>Siang (10:00 - 15:00)</option>
                         <option value="Malam" <?= $shift === 'Malam' ? 'selected' : '' ?>>Malam (16:00 - 21:30)</option>
+                        <option value="1 Hari" <?= ($shift === '1 Hari' || $shift === 'Full Day') ? 'selected' : '' ?>>1 Hari (07:00 - 21:30 Full Day)</option>
                         <?php if ($shift === 'Sore'): ?>
                             <option value="Sore" selected>Sore (Legacy)</option>
                         <?php endif; ?>
@@ -532,6 +536,7 @@ require_once __DIR__ . '/includes/header.php';
                                 <option value="Pagi">Shift Pagi (07:00 - 10:00)</option>
                                 <option value="Siang">Shift Siang (10:00 - 15:00)</option>
                                 <option value="Malam">Shift Malam (16:00 - 21:30)</option>
+                                <option value="1 Hari">Shift 1 Hari (07:00 - 21:30 Full Day)</option>
                             </select>
                         </div>
                         <div class="col-12 col-md-6">

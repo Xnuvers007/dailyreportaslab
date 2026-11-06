@@ -1,6 +1,16 @@
 <?php
 require_once __DIR__ . '/config/security.php';
+require_once __DIR__ . '/config/database.php';
+require_once __DIR__ . '/config/auth.php';
+require_once __DIR__ . '/config/logger.php';
+
 start_secure_session();
+
+// Catat log sebelum sesi dihancurkan
+$user = current_user();
+if ($user) {
+    record_log('LOGOUT', "Pengguna '{$user['nama_lengkap']}' ({$user['username']}) logout dari sistem", 'INFO');
+}
 
 // Kosongkan array sesi
 $_SESSION = [];

@@ -3,6 +3,7 @@ $page_title = "Kelola Akun Aslab";
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/config/security.php';
 require_once __DIR__ . '/config/auth.php';
+require_once __DIR__ . '/config/logger.php';
 
 // Hanya Admin yang berhak mengelola akun aslab
 require_admin();
@@ -52,6 +53,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['action']) && 
                         ':role'          => $role
                     ]);
 
+                    record_log('CREATE_USER', "Menambahkan akun pengguna baru: {$username} ({$nama_lengkap}) role {$role}", 'SUCCESS');
+
                     set_flash('success', "Akun aslab baru ({$username} - {$nama_lengkap}) berhasil didaftarkan!");
                     header("Location: kelola-aslab.php");
                     exit;
@@ -80,6 +83,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['action']) && 
                 $hash = password_hash($new_pass, PASSWORD_BCRYPT);
                 $stmt = $pdo->prepare("UPDATE `users` SET `password_hash` = :pass WHERE `id` = :id");
                 $stmt->execute([':pass' => $hash, ':id' => $target_id]);
+                record_log('RESET_PASSWORD', "Mereset password akun pengguna ID #{$target_id}", 'WARNING');
                 set_flash('success', "Password aslab berhasil direset.");
             } catch (PDOException $e) {
                 set_flash('danger', "Gagal mereset password.");
@@ -105,6 +109,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['action']) && 
             try {
                 $stmt_del = $pdo->prepare("DELETE FROM `users` WHERE `id` = :id");
                 $stmt_del->execute([':id' => $target_id]);
+                record_log('DELETE_USER', "Menghapus akun pengguna ID #{$target_id}", 'DANGER');
                 set_flash('success', "Akun aslab berhasil dihapus.");
             } catch (PDOException $e) {
                 set_flash('danger', "Gagal menghapus akun aslab.");

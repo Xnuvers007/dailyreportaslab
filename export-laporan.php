@@ -8,6 +8,7 @@
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/config/security.php';
 require_once __DIR__ . '/config/auth.php';
+require_once __DIR__ . '/config/logger.php';
 
 // Sistem Privasi Wajib Login
 require_login("Sistem bersifat tertutup. Silakan login terlebih dahulu untuk mengunduh laporan.");
@@ -69,7 +70,7 @@ if ($range_type === 'today') {
     $filter_desc[] = "Semua Arsip (Keseluruhan)";
 }
 
-if (!empty($shift) && in_array($shift, ['Pagi', 'Siang', 'Sore', 'Malam'])) {
+if (!empty($shift) && in_array($shift, ['Pagi', 'Siang', 'Sore', 'Malam', '1 Hari', 'Full Day'])) {
     $sql .= " AND `shift` = :shift";
     $params[':shift'] = $shift;
     $filter_desc[] = "Shift: " . $shift;
@@ -102,6 +103,10 @@ foreach ($rows as $r) {
 }
 
 $periode_string = implode(' | ', $filter_desc);
+
+// Catat log audit aktivitas ekspor
+$format_action = ($format === 'excel') ? 'EXPORT_EXCEL' : 'EXPORT_PDF';
+record_log($format_action, "Mengekspor {$total_data} data laporan ke {$format_action} ({$periode_string})", 'INFO');
 
 // ========================================================
 // 1. EXCEL SPREADSHEET EXPORT (.XLS)

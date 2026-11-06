@@ -82,6 +82,20 @@ try {
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )");
 
+            $pdo->exec("CREATE TABLE IF NOT EXISTS activity_logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NULL,
+                username TEXT NOT NULL,
+                action TEXT NOT NULL,
+                description TEXT NOT NULL,
+                ip_address TEXT NOT NULL,
+                user_agent TEXT NULL,
+                url_path TEXT NULL,
+                method TEXT DEFAULT 'GET',
+                status TEXT DEFAULT 'INFO',
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )");
+
             // Default user: aslab / admin123
             $pass_hash = password_hash('admin123', PASSWORD_BCRYPT);
             $stmt_u = $pdo->prepare("INSERT OR IGNORE INTO users (id, username, password_hash, nama_lengkap, role) VALUES (1, 'aslab', :p, 'Asisten Laboratorium', 'admin')");

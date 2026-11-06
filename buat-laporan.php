@@ -3,6 +3,7 @@ $page_title = "Input Laporan Harian";
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/config/security.php';
 require_once __DIR__ . '/config/auth.php';
+require_once __DIR__ . '/config/logger.php';
 
 // Wajib login untuk membuat laporan
 require_login("Silakan login sebagai aslab terlebih dahulu untuk membuat laporan harian.");
@@ -34,7 +35,12 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     // 2. Sanitasi & Ambil Input
     $tanggal            = trim($_POST['tanggal'] ?? date('Y-m-d'));
     $shift              = trim($_POST['shift'] ?? 'Pagi');
-    $petugas_nama       = trim($_POST['petugas_nama'] ?? '');
+    
+    // KEAMANAN INTEGRITAS KETAT (ANTI-TAMPER):
+    // Nama petugas tidak boleh diambil dari payload user mentah. 
+    // Sekalipun dimodifikasi via Inspect Element / DevTools / HTTP injection,
+    // server backend selalu memaksa nama petugas sesuai akun sesi login yang terotentikasi!
+    $petugas_nama       = $user ? $user['nama_lengkap'] : 'Asisten Lab';
     
     $kabel_roll_tersedia = max(0, (int)($_POST['kabel_roll_tersedia'] ?? 0));
     $kabel_roll_rusak    = max(0, (int)($_POST['kabel_roll_rusak'] ?? 0));
@@ -61,10 +67,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     ];
 
     // 3. Validasi Dasar
-    if (empty($petugas_nama)) {
-        $errors[] = "Nama petugas aslab wajib diisi.";
-    }
-    if (!in_array($shift, ['Pagi', 'Siang', 'Sore', 'Malam'])) {
+    if (!in_array($shift, ['Pagi', 'Siang', 'Malam', '1 Hari', 'Full Day', 'Sore'])) {
         $errors[] = "Pilihan shift tidak valid.";
     }
     if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $tanggal)) {
@@ -113,6 +116,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             ]);
 
             $new_id = $pdo->lastInsertId();
+            
+            // Catat Log Audit Aktivitas
+            record_log('CREATE_REPORT', "Menginput laporan harian shift {$shift} (Kabel: {$kabel_roll_tersedia} siap, Proyektor: {$proyektor_tersedia} siap) ID #{$new_id}", 'SUCCESS');
+
             set_flash('success', "Laporan harian shift {$shift} berhasil disimpan!");
             header("Location: detail.php?id=" . (int)$new_id);
             exit;
@@ -222,6 +229,15 @@ require_once __DIR__ . '/includes/header.php';
                                     </label>
                                 </div>
 
+                                <div class="shift-radio-item">
+                                    <input type="radio" id="shift_full_day" name="shift" value="1 Hari" <?= in_array($form_data['shift'], ['1 Hari', 'Full Day']) ? 'checked' : '' ?>>
+                                    <label for="shift_full_day" class="shift-radio-label">
+                                        <i class="fa-solid fa-calendar-day text-success"></i>
+                                        <span class="shift-name">Shift 1 Hari</span>
+                                        <span class="shift-time">07:00 - 21:30 (Full Day)</span>
+                                    </label>
+                                </div>
+
                             </div>
                         </div>
 
@@ -235,10 +251,18 @@ require_once __DIR__ . '/includes/header.php';
                         </div>
 
                         <div class="col-12 col-md-6">
-                            <label for="petugas_nama" class="form-label small fw-semibold text-muted">Nama Petugas Aslab Jaga</label>
+                            <label for="petugas_nama" class="form-label small fw-semibold text-muted">
+                                Petugas Aslab Jaga (Terkunci Sesuai Akun Login)
+                            </label>
                             <div class="input-group">
-                                <span class="input-group-text"><i class="fa-regular fa-user"></i></span>
-                                <input type="text" class="form-control" id="petugas_nama" name="petugas_nama" placeholder="Contoh: Lucky / Petugas Jaga" value="<?= e($form_data['petugas_nama']) ?>" required>
+                                <span class="input-group-text bg-body-tertiary"><i class="fa-solid fa-lock text-success"></i></span>
+                                <input type="text" class="form-control bg-body-tertiary fw-bold text-main" id="petugas_nama" name="petugas_nama" value="<?= e($user ? $user['nama_lengkap'] : 'Asisten Lab') ?>" readonly>
+                                <span class="input-group-text bg-success-subtle text-success small fw-semibold">
+                                    <i class="fa-solid fa-circle-check me-1"></i> Terverifikasi
+                                </span>
+                            </div>
+                            <div class="form-text small text-muted">
+                                <i class="fa-solid fa-shield-halved me-1 text-success"></i> Nama otomatis terkunci sesuai akun <strong>@<?= e($user ? $user['username'] : '') ?></strong> untuk mencegah manipulasi data.
                             </div>
                         </div>
 

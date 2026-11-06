@@ -3,6 +3,7 @@ $page_title = "Login Aslab";
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/config/security.php';
 require_once __DIR__ . '/config/auth.php';
+require_once __DIR__ . '/config/logger.php';
 
 if (is_logged_in()) {
     header("Location: index.php");
@@ -21,12 +22,13 @@ if (preg_match('/^(https?:|\/\/)/i', $redirect) || !preg_match('/^[a-zA-Z0-9_\-\
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     // 1. Validasi CSRF
     $csrf_token = $_POST['csrf_token'] ?? '';
+    $username = trim($_POST['username'] ?? '');
+    $password = (string)($_POST['password'] ?? '');
+
     if (!validate_csrf_token($csrf_token)) {
         $error = "Token sesi keamanan tidak valid. Silakan coba kembali.";
+        record_log('LOGIN_CSRF_FAILED', "Percobaan login ditolak: Token CSRF tidak valid", 'DANGER', $username ?: 'Unknown');
     } else {
-        $username = trim($_POST['username'] ?? '');
-        $password = (string)($_POST['password'] ?? '');
-
         // Delay kecil untuk mitigasi brute force timing attack
         usleep(150000); // 150ms
 
@@ -47,11 +49,14 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                     $_SESSION['nama_lengkap'] = $user['nama_lengkap'];
                     $_SESSION['role']         = $user['role'];
 
+                    record_log('LOGIN_SUCCESS', "Login berhasil sebagai '{$user['nama_lengkap']}' ({$user['role']})", 'SUCCESS', $user['username']);
+
                     set_flash('success', "Selamat datang kembali, " . $user['nama_lengkap'] . "!");
                     header("Location: " . $redirect);
                     exit;
                 } else {
                     $error = "Username atau password yang Anda masukkan salah.";
+                    record_log('LOGIN_FAILED', "Percobaan login gagal untuk username '{$username}'", 'WARNING', $username);
                 }
             } catch (PDOException $e) {
                 error_log("Login DB Error: " . $e->getMessage());

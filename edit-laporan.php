@@ -2,6 +2,7 @@
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/config/security.php';
 require_once __DIR__ . '/config/auth.php';
+require_once __DIR__ . '/config/logger.php';
 
 // Wajib login untuk mengedit laporan
 require_login("Silakan login sebagai aslab terlebih dahulu untuk mengedit laporan.");
@@ -37,7 +38,11 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     // 2. Sanitasi Input
     $tanggal            = trim($_POST['tanggal'] ?? $laporan['tanggal']);
     $shift              = trim($_POST['shift'] ?? $laporan['shift']);
-    $petugas_nama       = trim($_POST['petugas_nama'] ?? '');
+    
+    // KEAMANAN INTEGRITAS KETAT (ANTI-TAMPER):
+    // Nama petugas dijaga sesuai pembuat asli atau nama akun login aktif,
+    // tidak boleh ditimpa dari manipulasi DevTools / raw POST.
+    $petugas_nama       = !empty($laporan['petugas_nama']) ? $laporan['petugas_nama'] : ($user ? $user['nama_lengkap'] : 'Asisten Lab');
     
     $kabel_roll_tersedia = max(0, (int)($_POST['kabel_roll_tersedia'] ?? 0));
     $kabel_roll_rusak    = max(0, (int)($_POST['kabel_roll_rusak'] ?? 0));
@@ -51,10 +56,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     $hapus_foto          = !empty($_POST['hapus_foto']);
 
     // 3. Validasi
-    if (empty($petugas_nama)) {
-        $errors[] = "Nama petugas aslab wajib diisi.";
-    }
-    if (!in_array($shift, ['Pagi', 'Siang', 'Sore', 'Malam'])) {
+    if (!in_array($shift, ['Pagi', 'Siang', 'Malam', '1 Hari', 'Full Day', 'Sore'])) {
         $errors[] = "Pilihan shift tidak valid.";
     }
     if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $tanggal)) {
@@ -123,6 +125,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                 ':foto_dokumentasi'    => $foto_filename,
                 ':id'                  => $id
             ]);
+
+            // Catat log audit aktivitas
+            record_log('UPDATE_REPORT', "Memperbarui laporan shift {$shift} tanggal " . date('d/m/Y', strtotime($tanggal)) . " (ID #{$id})", 'SUCCESS');
 
             set_flash('success', "Laporan tanggal " . date('d/m/Y', strtotime($tanggal)) . " berhasil diperbarui.");
             header("Location: detail.php?id=" . (int)$id);
@@ -230,6 +235,15 @@ require_once __DIR__ . '/includes/header.php';
                                     </label>
                                 </div>
 
+                                <div class="shift-radio-item">
+                                    <input type="radio" id="edit_shift_1hari" name="shift" value="1 Hari" <?= ($laporan['shift'] === '1 Hari' || $laporan['shift'] === 'Full Day') ? 'checked' : '' ?>>
+                                    <label for="edit_shift_1hari" class="shift-radio-label">
+                                        <i class="fa-solid fa-clock-rotate-left text-success"></i>
+                                        <span class="shift-name">Shift 1 Hari</span>
+                                        <span class="shift-time">07:00 - 21:30 (Full)</span>
+                                    </label>
+                                </div>
+
                                 <?php if ($laporan['shift'] === 'Sore'): ?>
                                     <div class="shift-radio-item">
                                         <input type="radio" id="edit_shift_sore" name="shift" value="Sore" checked>
@@ -254,10 +268,20 @@ require_once __DIR__ . '/includes/header.php';
                         </div>
 
                         <div class="col-12 col-md-6">
-                            <label for="petugas_nama" class="form-label small fw-semibold text-muted">Nama Petugas Aslab</label>
+                            <label for="petugas_nama" class="form-label small fw-semibold text-muted d-flex align-items-center justify-content-between">
+                                <span>Nama Petugas Aslab Jaga</span>
+                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
+                                    <i class="fa-solid fa-lock me-1"></i>Terkunci Permanen
+                                </span>
+                            </label>
                             <div class="input-group">
-                                <span class="input-group-text"><i class="fa-regular fa-user"></i></span>
-                                <input type="text" class="form-control" id="petugas_nama" name="petugas_nama" value="<?= e($laporan['petugas_nama']) ?>" required>
+                                <span class="input-group-text bg-body-tertiary border-end-0">
+                                    <i class="fa-solid fa-shield-halved text-primary"></i>
+                                </span>
+                                <input type="text" class="form-control bg-body-tertiary border-start-0 fw-bold" id="petugas_nama" name="petugas_nama" value="<?= e($laporan['petugas_nama']) ?>" readonly>
+                            </div>
+                            <div class="form-text small text-muted">
+                                <i class="fa-solid fa-circle-check text-success me-1"></i>Identitas petugas terkunci dan diverifikasi server (anti-tamper).
                             </div>
                         </div>
 
