@@ -30,6 +30,7 @@
     <script src="assets/js/theme.js"></script>
     <script src="assets/js/animations.js"></script>
     <script src="assets/js/avatar3d.js"></script>
+    <script src="assets/js/forms.js"></script>
     <script src="assets/js/app.js"></script>
 </body>
 </html>

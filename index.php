@@ -77,7 +77,7 @@ if ($latest) {
                 </a>
                 <a href="riwayat.php" class="btn btn-outline-secondary d-flex align-items-center gap-2">
                     <i class="fa-solid fa-clock-rotate-left"></i>
-                    <span>Lihat Semua Arsip</span>
+                    <span>Arsip & Ekspor Data</span>
                 </a>
                 <span class="badge bg-body-tertiary text-body border p-2 px-3 small ms-md-2">
                     <i class="fa-regular fa-calendar-check text-primary me-1"></i>
@@ -290,10 +290,18 @@ if ($latest) {
             <i class="fa-solid fa-list-check text-primary"></i>
             <span class="fw-bold">Riwayat Laporan Terakhir</span>
         </div>
-        <a href="riwayat.php" class="btn btn-outline-secondary btn-sm">
-            <span>Lihat Semua Arsip</span>
-            <i class="fa-solid fa-arrow-right ms-1"></i>
-        </a>
+        <div class="d-flex align-items-center gap-2">
+            <a href="export-laporan.php?format=pdf&range_type=all" target="_blank" class="btn btn-outline-danger btn-sm" title="Cetak / Unduh PDF Rekap">
+                <i class="fa-solid fa-file-pdf me-1"></i> PDF
+            </a>
+            <a href="export-laporan.php?format=excel&range_type=all" class="btn btn-outline-success btn-sm" title="Unduh Spreadsheet Excel">
+                <i class="fa-solid fa-file-excel me-1"></i> Excel
+            </a>
+            <a href="riwayat.php" class="btn btn-outline-secondary btn-sm">
+                <span>Semua Arsip</span>
+                <i class="fa-solid fa-arrow-right ms-1"></i>
+            </a>
+        </div>
     </div>
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">

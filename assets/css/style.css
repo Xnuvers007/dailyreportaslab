@@ -6,6 +6,7 @@
 @import url('theme.css');
 @import url('animations.css');
 @import url('components.css');
+@import url('forms.css');
 
 /* Base Body Styles */
 body {

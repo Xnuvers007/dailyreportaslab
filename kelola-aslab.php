@@ -119,195 +119,350 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['action']) && 
 $stmt_users = $pdo->query("SELECT `id`, `username`, `nama_lengkap`, `role`, `created_at` FROM `users` ORDER BY `id` ASC");
 $users = $stmt_users->fetchAll();
 
+$count_admin = 0;
+$count_aslab = 0;
+foreach ($users as $u) {
+    if ($u['role'] === 'admin') $count_admin++;
+    else $count_aslab++;
+}
+
 require_once __DIR__ . '/includes/header.php';
 ?>
 
-<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
-    <div>
-        <h3 class="h4 mb-1 fw-bold">
-            <i class="fa-solid fa-users-gear text-primary me-2"></i>Kelola Akun Asisten Lab
-        </h3>
-        <p class="text-muted small mb-0">Hanya Administrator yang dapat mendaftarkan akun aslab baru atau mereset password.</p>
-    </div>
-    <button type="button" class="btn btn-primary btn-sm d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#tambahModal">
-        <i class="fa-solid fa-user-plus"></i>
-        <span>Tambah Aslab Baru</span>
-    </button>
-</div>
+<div class="animate-fade-up">
 
-<?php if (!empty($errors)): ?>
-    <div class="alert alert-danger shadow-sm">
-        <div class="fw-bold mb-1"><i class="fa-solid fa-circle-exclamation me-1"></i> Perhatian:</div>
-        <ul class="mb-0 ps-3 small">
-            <?php foreach ($errors as $err): ?>
-                <li><?= e($err) ?></li>
-            <?php endforeach; ?>
-        </ul>
+    <!-- Header Page Title & Action Button -->
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+        <div>
+            <div class="hologram-tag mb-2">
+                <i class="fa-solid fa-shield-halved text-warning"></i>
+                <span>Administrator Console &bull; Universitas Pamulang</span>
+            </div>
+            <h2 class="h3 fw-bold mb-1">
+                Kelola Akun Asisten Laboratorium
+            </h2>
+            <p class="text-muted small mb-0">
+                Pusat manajemen hak akses, pendaftaran anggota aslab baru, dan keamanan autentikasi sistem.
+            </p>
+        </div>
+        <div>
+            <button type="button" class="btn btn-primary d-flex align-items-center gap-2 shadow" data-bs-toggle="modal" data-bs-target="#tambahModal">
+                <i class="fa-solid fa-user-plus"></i>
+                <span>Tambah Aslab Baru</span>
+            </button>
+        </div>
     </div>
-<?php endif; ?>
 
-<div class="card shadow-sm">
-    <div class="card-header py-3 d-flex justify-content-between align-items-center">
-        <span class="fw-bold">
-            <i class="fa-solid fa-id-card-clip text-primary me-2"></i>Daftar Petugas Terdaftar (<?= count($users) ?> Akun)
-        </span>
-    </div>
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead>
-                <tr>
-                    <th class="ps-3" style="width: 50px;">#</th>
-                    <th>Nama Lengkap</th>
-                    <th>Username</th>
-                    <th>Hak Akses (Role)</th>
-                    <th>Tanggal Terdaftar</th>
-                    <th class="text-end pe-3">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($users as $idx => $u): ?>
-                    <tr>
-                        <td class="ps-3 text-muted"><?= $idx + 1 ?></td>
-                        <td>
-                            <div class="fw-semibold"><?= e($u['nama_lengkap']) ?></div>
-                            <?php if ($u['id'] == $currentUser['id']): ?>
-                                <span class="badge bg-secondary-subtle text-secondary small">(Akun Anda)</span>
-                            <?php endif; ?>
-                        </td>
-                        <td>
-                            <code><?= e($u['username']) ?></code>
-                        </td>
-                        <td>
-                            <?php if ($u['role'] === 'admin'): ?>
-                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
-                                    <i class="fa-solid fa-crown me-1 text-warning"></i> Administrator
-                                </span>
-                            <?php else: ?>
-                                <span class="badge bg-body-tertiary text-body border">
-                                    <i class="fa-solid fa-user me-1"></i> Asisten Lab
-                                </span>
-                            <?php endif; ?>
-                        </td>
-                        <td class="text-muted small">
-                            <?= date('d/m/Y H:i', strtotime($u['created_at'])) ?>
-                        </td>
-                        <td class="text-end pe-3">
-                            <div class="btn-group btn-group-sm">
-                                <button type="button" class="btn btn-outline-secondary" title="Reset Password" data-bs-toggle="modal" data-bs-target="#resetModal<?= (int)$u['id'] ?>">
-                                    <i class="fa-solid fa-key"></i>
-                                </button>
-                                <?php if ($u['id'] != $currentUser['id']): ?>
-                                    <button type="button" class="btn btn-outline-danger" title="Hapus Akun" data-bs-toggle="modal" data-bs-target="#hapusModal<?= (int)$u['id'] ?>">
-                                        <i class="fa-solid fa-trash"></i>
-                                    </button>
-                                <?php endif; ?>
-                            </div>
-                        </td>
-                    </tr>
-
-                    <!-- Modal Reset Password -->
-                    <div class="modal fade" id="resetModal<?= (int)$u['id'] ?>" tabindex="-1" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content">
-                                <form action="kelola-aslab.php" method="POST">
-                                    <?= csrf_input() ?>
-                                    <input type="hidden" name="action" value="reset_password">
-                                    <input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title fs-6 fw-bold">
-                                            <i class="fa-solid fa-key text-warning me-2"></i>Reset Password: <?= e($u['nama_lengkap']) ?>
-                                        </h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div class="mb-3">
-                                            <label class="form-label small fw-semibold">Password Baru</label>
-                                            <input type="password" name="new_password" class="form-control" placeholder="Minimal 6 karakter" required minlength="6">
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Batal</button>
-                                        <button type="submit" class="btn btn-primary btn-sm">Simpan Password Baru</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
+    <!-- 4 KPI Metrics Admin Cards -->
+    <div class="row g-3 mb-4">
+        
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="kpi-card kpi-blue">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-semibold text-uppercase">Total Pengguna</span>
+                    <div class="stat-icon-box stat-primary" style="width: 38px; height: 38px; font-size: 1rem;">
+                        <i class="fa-solid fa-users"></i>
                     </div>
+                </div>
+                <div class="h3 fw-bold mb-1 text-primary">
+                    <span class="counter-value" data-target="<?= count($users) ?>"><?= count($users) ?></span>
+                    <span class="fs-6 fw-normal text-muted">Akun</span>
+                </div>
+                <div class="small text-muted d-flex align-items-center gap-1">
+                    <i class="fa-solid fa-user-check text-success me-1"></i> Terdaftar di database
+                </div>
+            </div>
+        </div>
 
-                    <!-- Modal Hapus User -->
-                    <?php if ($u['id'] != $currentUser['id']): ?>
-                        <div class="modal fade" id="hapusModal<?= (int)$u['id'] ?>" tabindex="-1" aria-hidden="true">
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="kpi-card kpi-orange">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-semibold text-uppercase">Administrator</span>
+                    <div class="stat-icon-box stat-orange" style="width: 38px; height: 38px; font-size: 1rem;">
+                        <i class="fa-solid fa-crown text-warning"></i>
+                    </div>
+                </div>
+                <div class="h3 fw-bold mb-1" style="color: var(--unpam-orange);">
+                    <span class="counter-value" data-target="<?= $count_admin ?>"><?= $count_admin ?></span>
+                    <span class="fs-6 fw-normal text-muted">Admin</span>
+                </div>
+                <div class="small text-muted">Akses penuh sistem & akun</div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="kpi-card kpi-green">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-semibold text-uppercase">Asisten Lab Aktif</span>
+                    <div class="stat-icon-box stat-success" style="width: 38px; height: 38px; font-size: 1rem;">
+                        <i class="fa-solid fa-id-badge"></i>
+                    </div>
+                </div>
+                <div class="h3 fw-bold mb-1 text-success">
+                    <span class="counter-value" data-target="<?= $count_aslab ?>"><?= $count_aslab ?></span>
+                    <span class="fs-6 fw-normal text-muted">Petugas</span>
+                </div>
+                <div class="small text-muted">Hak input & laporan harian</div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="kpi-card kpi-purple">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-semibold text-uppercase">Status Sistem</span>
+                    <div class="stat-icon-box stat-secondary" style="width: 38px; height: 38px; font-size: 1rem;">
+                        <i class="fa-solid fa-lock text-success"></i>
+                    </div>
+                </div>
+                <div class="h5 fw-bold mb-1 text-success">
+                    Privat & Tertutup
+                </div>
+                <div class="small text-muted">Pendaftaran hanya via Admin</div>
+            </div>
+        </div>
+
+    </div>
+
+    <?php if (!empty($errors)): ?>
+        <div class="alert alert-danger shadow-sm border-0 border-start border-danger border-4 mb-4">
+            <div class="fw-bold mb-1"><i class="fa-solid fa-circle-exclamation me-1"></i> Mohon perbaiki kesalahan:</div>
+            <ul class="mb-0 ps-3 small">
+                <?php foreach ($errors as $err): ?>
+                    <li><?= e($err) ?></li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+    <?php endif; ?>
+
+    <!-- Tabel Akun Aslab Modern -->
+    <div class="card card-hover-lift">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+                <i class="fa-solid fa-address-book text-primary fs-5"></i>
+                <span class="fw-bold">Daftar Akun Terdaftar (<?= count($users) ?> Anggota)</span>
+            </div>
+            <span class="badge bg-body-tertiary text-body border small">
+                Login Sebagai: <strong><?= e($currentUser['nama_lengkap']) ?></strong>
+            </span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-3" style="width: 60px;">#</th>
+                        <th>Petugas Aslab</th>
+                        <th>Username</th>
+                        <th>Hak Akses (Role)</th>
+                        <th>Tanggal Terdaftar</th>
+                        <th class="text-end pe-3" style="width: 140px;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($users as $idx => $u): ?>
+                        <tr>
+                            <td class="ps-3 text-muted fw-bold"><?= $idx + 1 ?></td>
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="user-avatar-circle <?= $u['role'] === 'admin' ? 'avatar-admin' : 'avatar-aslab' ?>">
+                                        <?= strtoupper(substr($u['nama_lengkap'], 0, 2)) ?>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-main"><?= e($u['nama_lengkap']) ?></div>
+                                        <?php if ($u['id'] == $currentUser['id']): ?>
+                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle small">
+                                                <i class="fa-solid fa-check me-1"></i> Akun Anda (Sedang Aktif)
+                                            </span>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-body-tertiary text-body border font-monospace px-2 py-1">
+                                    @<?= e($u['username']) ?>
+                                </span>
+                            </td>
+                            <td>
+                                <?php if ($u['role'] === 'admin'): ?>
+                                    <span class="badge-unpam">
+                                        <i class="fa-solid fa-crown me-1 text-warning"></i> Administrator
+                                    </span>
+                                <?php else: ?>
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 rounded-pill">
+                                        <i class="fa-solid fa-laptop-code me-1"></i> Asisten Lab
+                                    </span>
+                                <?php endif; ?>
+                            </td>
+                            <td class="text-muted small">
+                                <i class="fa-regular fa-clock me-1 text-primary"></i>
+                                <?= date('d M Y, H:i', strtotime($u['created_at'])) ?>
+                            </td>
+                            <td class="text-end pe-3">
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-outline-warning" title="Reset Password" data-bs-toggle="modal" data-bs-target="#resetModal<?= (int)$u['id'] ?>">
+                                        <i class="fa-solid fa-key"></i>
+                                    </button>
+                                    <?php if ($u['id'] != $currentUser['id']): ?>
+                                        <button type="button" class="btn btn-outline-danger" title="Hapus Akun" data-bs-toggle="modal" data-bs-target="#hapusModal<?= (int)$u['id'] ?>">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    <?php else: ?>
+                                        <button type="button" class="btn btn-outline-secondary disabled" title="Tidak dapat menghapus akun sendiri">
+                                            <i class="fa-solid fa-ban"></i>
+                                        </button>
+                                    <?php endif; ?>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Modal Reset Password -->
+                        <div class="modal fade" id="resetModal<?= (int)$u['id'] ?>" tabindex="-1" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered">
-                                <div class="modal-content">
+                                <div class="modal-content border-0 shadow-lg" style="background-color: var(--card-bg);">
                                     <form action="kelola-aslab.php" method="POST">
                                         <?= csrf_input() ?>
-                                        <input type="hidden" name="action" value="hapus_aslab">
+                                        <input type="hidden" name="action" value="reset_password">
                                         <input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title fs-6 fw-bold text-danger">
-                                                <i class="fa-solid fa-triangle-exclamation me-2"></i>Hapus Akun Aslab
+                                        
+                                        <div class="modal-header border-bottom py-3">
+                                            <h5 class="modal-title fs-6 fw-bold">
+                                                <i class="fa-solid fa-key text-warning me-2"></i>Reset Password: <?= e($u['nama_lengkap']) ?>
                                             </h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
-                                        <div class="modal-body">
-                                            <p class="mb-0">Apakah Anda yakin ingin menghapus akun <strong><?= e($u['nama_lengkap']) ?> (<?= e($u['username']) ?>)</strong>?</p>
+                                        <div class="modal-body p-4">
+                                            <div class="p-3 bg-body-tertiary rounded-3 border mb-3">
+                                                <div class="small text-muted">Petugas: <strong><?= e($u['nama_lengkap']) ?></strong> (@<?= e($u['username']) ?>)</div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label small fw-semibold">Password Baru</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                                                    <input type="password" name="new_password" class="form-control" placeholder="Masukkan minimal 6 karakter" required minlength="6">
+                                                </div>
+                                                <div class="form-text small">Password baru akan langsung aktif dan dienkripsi bcrypt.</div>
+                                            </div>
                                         </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Batal</button>
-                                            <button type="submit" class="btn btn-danger btn-sm">Ya, Hapus Akun</button>
+                                        <div class="modal-footer border-top py-3">
+                                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                                            <button type="submit" class="btn btn-primary shadow">Simpan Password Baru</button>
                                         </div>
                                     </form>
                                 </div>
                             </div>
                         </div>
-                    <?php endif; ?>
 
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+                        <!-- Modal Hapus User -->
+                        <?php if ($u['id'] != $currentUser['id']): ?>
+                            <div class="modal fade" id="hapusModal<?= (int)$u['id'] ?>" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content border-0 shadow-lg" style="background-color: var(--card-bg);">
+                                        <form action="kelola-aslab.php" method="POST">
+                                            <?= csrf_input() ?>
+                                            <input type="hidden" name="action" value="hapus_aslab">
+                                            <input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>">
+                                            
+                                            <div class="modal-header border-bottom py-3 text-danger">
+                                                <h5 class="modal-title fs-6 fw-bold">
+                                                    <i class="fa-solid fa-triangle-exclamation me-2"></i>Konfirmasi Hapus Akun
+                                                </h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body p-4 text-center">
+                                                <div class="stat-icon-box bg-danger-subtle text-danger mx-auto mb-3" style="width: 58px; height: 58px; font-size: 1.5rem;">
+                                                    <i class="fa-solid fa-user-xmark"></i>
+                                                </div>
+                                                <h6 class="fw-bold mb-2">Hapus Akun Aslab Ini?</h6>
+                                                <p class="text-muted small mb-0">
+                                                    Akun <strong><?= e($u['nama_lengkap']) ?></strong> (@<?= e($u['username']) ?>) akan dihapus secara permanen dari basis data sistem.
+                                                </p>
+                                            </div>
+                                            <div class="modal-footer border-top py-3">
+                                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                                                <button type="submit" class="btn btn-danger shadow">Ya, Hapus Akun</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
+
 </div>
 
 <!-- Modal Tambah Aslab Baru -->
 <div class="modal fade" id="tambahModal" tabindex="-1" aria-labelledby="tambahModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg" style="background-color: var(--card-bg);">
             <form action="kelola-aslab.php" method="POST">
                 <?= csrf_input() ?>
                 <input type="hidden" name="action" value="tambah_aslab">
-                <div class="modal-header">
-                    <h5 class="modal-title fs-6 fw-bold" id="tambahModalLabel">
-                        <i class="fa-solid fa-user-plus text-primary me-2"></i>Pendaftaran Akun Aslab Baru
-                    </h5>
+                
+                <div class="modal-header border-bottom py-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="stat-icon-box stat-primary" style="width: 40px; height: 40px; font-size: 1.15rem;">
+                            <i class="fa-solid fa-user-plus"></i>
+                        </div>
+                        <div>
+                            <h5 class="modal-title fw-bold mb-0" id="tambahModalLabel">Pendaftaran Akun Aslab Baru</h5>
+                            <span class="small text-muted">Akun hanya dapat dibuat oleh Administrator Lab</span>
+                        </div>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="nama_lengkap" class="form-label small fw-semibold">Nama Lengkap Aslab</label>
-                        <input type="text" class="form-control" id="nama_lengkap" name="nama_lengkap" placeholder="Contoh: Muhammad Lucky" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="username" class="form-label small fw-semibold">Username Login</label>
-                        <input type="text" class="form-control" id="username" name="username" placeholder="Contoh: lucky" required pattern="[a-zA-Z0-9_]{3,30}">
-                        <div class="form-text small">Hanya huruf, angka, atau garis bawah (_).</div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label small fw-semibold">Password Awal</label>
-                        <input type="password" class="form-control" id="password" name="password" placeholder="Minimal 6 karakter" required minlength="6">
-                    </div>
-                    <div class="mb-3">
-                        <label for="role" class="form-label small fw-semibold">Hak Akses (Role)</label>
-                        <select class="form-select" id="role" name="role" required>
-                            <option value="aslab">Asisten Lab (Bisa input & edit laporan)</option>
-                            <option value="admin">Administrator (Bisa input, edit, & kelola akun aslab)</option>
-                        </select>
+
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        
+                        <div class="col-12 col-md-6">
+                            <label for="nama_lengkap" class="form-label small fw-semibold">Nama Lengkap Petugas</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-regular fa-id-card"></i></span>
+                                <input type="text" class="form-control" id="nama_lengkap" name="nama_lengkap" placeholder="Contoh: Muhammad Lucky" required>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label for="username" class="form-label small fw-semibold">Username Login</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-at"></i></span>
+                                <input type="text" class="form-control" id="username" name="username" placeholder="Contoh: lucky" required pattern="[a-zA-Z0-9_]{3,30}">
+                            </div>
+                            <div class="form-text small">Hanya huruf, angka, atau underscore (_) tanpa spasi.</div>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label for="password" class="form-label small fw-semibold">Password Awal</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-key"></i></span>
+                                <input type="password" class="form-control" id="password" name="password" placeholder="Minimal 6 karakter" required minlength="6">
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label for="role" class="form-label small fw-semibold">Hak Akses (Role)</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-user-shield"></i></span>
+                                <select class="form-select" id="role" name="role" required>
+                                    <option value="aslab" selected>Asisten Lab (Input & Edit Laporan)</option>
+                                    <option value="admin">Administrator (Akses Penuh & Kelola Akun)</option>
+                                </select>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary btn-sm d-flex align-items-center gap-1">
+
+                <div class="modal-footer border-top py-3">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary d-flex align-items-center gap-2 shadow">
                         <i class="fa-solid fa-check"></i>
-                        <span>Daftarkan Akun</span>
+                        <span>Daftarkan Akun Aslab</span>
                     </button>
                 </div>
             </form>
@@ -316,4 +471,3 @@ require_once __DIR__ . '/includes/header.php';
 </div>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
-

@@ -15,11 +15,11 @@ $form_data = [
     'tanggal'             => date('Y-m-d'),
     'shift'               => 'Pagi',
     'petugas_nama'        => $user ? $user['nama_lengkap'] : '',
-    'kabel_roll_tersedia' => 0,
-    'kabel_roll_rusak'    => 0,
+    'kabel_roll_tersedia' => 10,
+    'kabel_roll_rusak'    => 1,
     'kabel_roll_catatan'  => '',
-    'proyektor_tersedia'  => 0,
-    'proyektor_rusak'     => 0,
+    'proyektor_tersedia'  => 38,
+    'proyektor_rusak'     => 5,
     'proyektor_catatan'   => '',
     'catatan_umum'        => ''
 ];
@@ -113,7 +113,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             ]);
 
             $new_id = $pdo->lastInsertId();
-            set_flash('success', "Laporan harian berhasil disimpan!");
+            set_flash('success', "Laporan harian shift {$shift} berhasil disimpan!");
             header("Location: detail.php?id=" . (int)$new_id);
             exit;
         } catch (PDOException $e) {
@@ -126,26 +126,40 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 require_once __DIR__ . '/includes/header.php';
 ?>
 
-<div class="row justify-content-center">
-    <div class="col-12 col-lg-9">
+<div class="row justify-content-center animate-fade-up">
+    <div class="col-12 col-xl-10">
         
-        <div class="d-flex align-items-center justify-content-between mb-4">
+        <!-- Header Page Title -->
+        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
             <div>
-                <h3 class="h4 mb-1 fw-bold">
-                    <i class="fa-solid fa-file-signature text-primary me-2"></i>Input Laporan Harian
-                </h3>
-                <p class="text-muted small mb-0">Catat jumlah fisik proyektor, kabel roll, dan kondisi perlengkapan lab.</p>
+                <div class="hologram-tag mb-2">
+                    <i class="fa-solid fa-file-pen text-warning"></i>
+                    <span>Formulir Serah Terima Shift &bull; Lab TI UNPAM</span>
+                </div>
+                <h2 class="h3 fw-bold mb-1">
+                    Input Laporan Harian Inventaris
+                </h2>
+                <p class="text-muted small mb-0">
+                    Catat ketersediaan fisik kabel roll, unit proyektor, dan catatan operasional shift sebelum perkuliahan dimulai.
+                </p>
             </div>
-            <a href="index.php" class="btn btn-outline-secondary btn-sm">
-                <i class="fa-solid fa-arrow-left me-1"></i> Kembali
-            </a>
+            <div class="d-flex align-items-center gap-2">
+                <a href="riwayat.php" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span>Riwayat Arsip</span>
+                </a>
+                <a href="index.php" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>Dashboard</span>
+                </a>
+            </div>
         </div>
 
         <?php if (!empty($errors)): ?>
-            <div class="alert alert-danger shadow-sm">
+            <div class="alert alert-danger shadow-sm border-0 border-start border-danger border-4 mb-4">
                 <div class="d-flex align-items-center gap-2 mb-2">
                     <i class="fa-solid fa-circle-exclamation text-danger fs-5"></i>
-                    <strong>Mohon perbaiki kesalahan berikut:</strong>
+                    <strong>Mohon periksa dan lengkapi input berikut:</strong>
                 </div>
                 <ul class="mb-0 ps-3 small">
                     <?php foreach ($errors as $err): ?>
@@ -158,142 +172,316 @@ require_once __DIR__ . '/includes/header.php';
         <form action="buat-laporan.php" method="POST" enctype="multipart/form-data" class="needs-validation">
             <?= csrf_input() ?>
 
-            <!-- Bagian 1: Data Shift & Petugas -->
-            <div class="card mb-4">
-                <div class="card-header py-3">
-                    <i class="fa-solid fa-calendar-day text-primary me-2"></i>Informasi Waktu & Petugas
+            <!-- KARTU 1: Shift & Identitas Petugas -->
+            <div class="card mb-4 card-hover-lift border-gradient-top">
+                <div class="card-header py-3 d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="stat-icon-box stat-primary" style="width: 38px; height: 38px; font-size: 1.1rem;">
+                            <i class="fa-solid fa-calendar-check"></i>
+                        </div>
+                        <span class="fw-bold">1. Informasi Waktu & Petugas Shift</span>
+                    </div>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle small px-3">
+                        <i class="fa-regular fa-clock me-1"></i> <?= date('H:i') ?> WIB
+                    </span>
                 </div>
                 <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-12 col-md-4">
-                            <label for="tanggal" class="form-label small fw-semibold">Tanggal Laporan</label>
+                    <div class="row g-4">
+                        
+                        <!-- Pilihan Shift Kerja Modern (Radio Card Grid) -->
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold text-uppercase text-muted" style="letter-spacing: 0.05em;">
+                                Pilih Shift Kerja
+                            </label>
+                            <div class="shift-selector-grid">
+                                
+                                <div class="shift-radio-item">
+                                    <input type="radio" id="shift_pagi" name="shift" value="Pagi" <?= $form_data['shift'] === 'Pagi' ? 'checked' : '' ?> required>
+                                    <label for="shift_pagi" class="shift-radio-label">
+                                        <i class="fa-solid fa-sun"></i>
+                                        <span class="shift-name">Shift Pagi</span>
+                                        <span class="shift-time">07:30 - 12:00</span>
+                                    </label>
+                                </div>
+
+                                <div class="shift-radio-item">
+                                    <input type="radio" id="shift_siang" name="shift" value="Siang" <?= $form_data['shift'] === 'Siang' ? 'checked' : '' ?>>
+                                    <label for="shift_siang" class="shift-radio-label">
+                                        <i class="fa-solid fa-cloud-sun"></i>
+                                        <span class="shift-name">Shift Siang</span>
+                                        <span class="shift-time">12:00 - 16:30</span>
+                                    </label>
+                                </div>
+
+                                <div class="shift-radio-item">
+                                    <input type="radio" id="shift_sore" name="shift" value="Sore" <?= $form_data['shift'] === 'Sore' ? 'checked' : '' ?>>
+                                    <label for="shift_sore" class="shift-radio-label">
+                                        <i class="fa-solid fa-cloud-moon"></i>
+                                        <span class="shift-name">Shift Sore</span>
+                                        <span class="shift-time">16:30 - 21:00</span>
+                                    </label>
+                                </div>
+
+                                <div class="shift-radio-item">
+                                    <input type="radio" id="shift_malam" name="shift" value="Malam" <?= $form_data['shift'] === 'Malam' ? 'checked' : '' ?>>
+                                    <label for="shift_malam" class="shift-radio-label">
+                                        <i class="fa-solid fa-moon"></i>
+                                        <span class="shift-name">Shift Malam</span>
+                                        <span class="shift-time">Lembur / Opsional</span>
+                                    </label>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- Tanggal & Petugas -->
+                        <div class="col-12 col-md-6">
+                            <label for="tanggal" class="form-label small fw-semibold text-muted">Tanggal Pelaporan</label>
                             <div class="input-group">
-                                <span class="input-group-text"><i class="fa-regular fa-calendar"></i></span>
+                                <span class="input-group-text"><i class="fa-regular fa-calendar-days"></i></span>
                                 <input type="date" class="form-control" id="tanggal" name="tanggal" value="<?= e($form_data['tanggal']) ?>" required>
                             </div>
                         </div>
-                        <div class="col-12 col-md-4">
-                            <label for="shift" class="form-label small fw-semibold">Shift Kerja</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fa-solid fa-business-time"></i></span>
-                                <select class="form-select" id="shift" name="shift" required>
-                                    <option value="Pagi" <?= $form_data['shift'] === 'Pagi' ? 'selected' : '' ?>>Pagi (07:30 - 12:00)</option>
-                                    <option value="Siang" <?= $form_data['shift'] === 'Siang' ? 'selected' : '' ?>>Siang (12:00 - 16:30)</option>
-                                    <option value="Sore" <?= $form_data['shift'] === 'Sore' ? 'selected' : '' ?>>Sore (16:30 - 21:00)</option>
-                                    <option value="Malam" <?= $form_data['shift'] === 'Malam' ? 'selected' : '' ?>>Malam</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-12 col-md-4">
-                            <label for="petugas_nama" class="form-label small fw-semibold">Nama Petugas Aslab</label>
+
+                        <div class="col-12 col-md-6">
+                            <label for="petugas_nama" class="form-label small fw-semibold text-muted">Nama Petugas Aslab Jaga</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fa-regular fa-user"></i></span>
-                                <input type="text" class="form-control" id="petugas_nama" name="petugas_nama" placeholder="Contoh: Lucky" value="<?= e($form_data['petugas_nama']) ?>" required>
+                                <input type="text" class="form-control" id="petugas_nama" name="petugas_nama" placeholder="Contoh: Lucky / Petugas Jaga" value="<?= e($form_data['petugas_nama']) ?>" required>
                             </div>
                         </div>
+
                     </div>
                 </div>
             </div>
 
-            <!-- Bagian 2: Inventaris Kabel Roll -->
-            <div class="card mb-4 border-start border-success border-4">
+            <!-- KARTU 2: Inventaris Kabel Roll -->
+            <div class="card mb-4 card-hover-lift border-start border-warning border-4">
                 <div class="card-header py-3 d-flex align-items-center justify-content-between">
                     <div class="d-flex align-items-center gap-2">
-                        <i class="fa-solid fa-plug text-success fs-5"></i>
-                        <span class="fw-bold">Inventaris Kabel Roll / Stop Kontak</span>
+                        <div class="stat-icon-box stat-orange" style="width: 38px; height: 38px; font-size: 1.1rem;">
+                            <i class="fa-solid fa-plug"></i>
+                        </div>
+                        <span class="fw-bold">2. Inventaris Kabel Roll / Stop Kontak</span>
                     </div>
-                    <span class="badge bg-success-subtle text-success fs-6" id="total_kabel_display">0 Unit</span>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="small text-muted d-none d-sm-inline">Total Fisik:</span>
+                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle fs-6" id="total_kabel_display">
+                            <?= (int)$form_data['kabel_roll_tersedia'] + (int)$form_data['kabel_roll_rusak'] ?> Unit
+                        </span>
+                    </div>
                 </div>
                 <div class="card-body">
-                    <div class="row g-3">
+                    <div class="row g-4">
+                        
+                        <!-- Kabel Siap -->
                         <div class="col-12 col-md-6">
-                            <label for="kabel_roll_tersedia" class="form-label small fw-semibold text-success">
-                                <i class="fa-solid fa-check-circle me-1"></i> Kabel Roll Siap Pakai / Tersedia
-                            </label>
-                            <input type="number" class="form-control form-control-lg fw-bold" id="kabel_roll_tersedia" name="kabel_roll_tersedia" min="0" value="<?= (int)$form_data['kabel_roll_tersedia'] ?>" required>
-                            <div class="form-text small">Jumlah kabel roll yang siap dipinjamkan ke kelas/dosen.</div>
+                            <div class="p-3 bg-body-tertiary rounded-3 border">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <label for="kabel_roll_tersedia" class="form-label small fw-bold text-success mb-0">
+                                        <i class="fa-solid fa-circle-check me-1"></i> Siap Pakai / Tersedia
+                                    </label>
+                                    <span class="badge bg-success-subtle text-success small">Siap Pakai</span>
+                                </div>
+                                <div class="number-stepper">
+                                    <button type="button" class="stepper-btn btn-minus" title="Kurangi"><i class="fa-solid fa-minus"></i></button>
+                                    <input type="number" id="kabel_roll_tersedia" name="kabel_roll_tersedia" min="0" value="<?= (int)$form_data['kabel_roll_tersedia'] ?>" required>
+                                    <button type="button" class="stepper-btn btn-plus" title="Tambah"><i class="fa-solid fa-plus"></i></button>
+                                </div>
+                                <div class="small text-muted mt-2">Kabel roll kondisi normal yang bisa dipinjamkan.</div>
+                            </div>
                         </div>
+
+                        <!-- Kabel Rusak -->
                         <div class="col-12 col-md-6">
-                            <label for="kabel_roll_rusak" class="form-label small fw-semibold text-danger">
-                                <i class="fa-solid fa-circle-xmark me-1"></i> Kabel Roll Rusak / Tidak Siap
-                            </label>
-                            <input type="number" class="form-control form-control-lg fw-bold" id="kabel_roll_rusak" name="kabel_roll_rusak" min="0" value="<?= (int)$form_data['kabel_roll_rusak'] ?>">
-                            <div class="form-text small">Unit yang putus, terbakar, atau sedang diperbaiki.</div>
+                            <div class="p-3 bg-body-tertiary rounded-3 border">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <label for="kabel_roll_rusak" class="form-label small fw-bold text-danger mb-0">
+                                        <i class="fa-solid fa-circle-xmark me-1"></i> Rusak / Tidak Siap
+                                    </label>
+                                    <span class="badge bg-danger-subtle text-danger small">Bermasalah</span>
+                                </div>
+                                <div class="number-stepper">
+                                    <button type="button" class="stepper-btn btn-minus" title="Kurangi"><i class="fa-solid fa-minus"></i></button>
+                                    <input type="number" id="kabel_roll_rusak" name="kabel_roll_rusak" min="0" value="<?= (int)$form_data['kabel_roll_rusak'] ?>">
+                                    <button type="button" class="stepper-btn btn-plus" title="Tambah"><i class="fa-solid fa-plus"></i></button>
+                                </div>
+                                <div class="small text-muted mt-2">Unit stop kontak terbakar, kabel putus, atau dalam perbaikan.</div>
+                            </div>
                         </div>
+
+                        <!-- Catatan Kabel -->
                         <div class="col-12">
-                            <label for="kabel_roll_catatan" class="form-label small fw-semibold">Keterangan / Detail Kerusakan Kabel</label>
-                            <input type="text" class="form-control" id="kabel_roll_catatan" name="kabel_roll_catatan" placeholder="Contoh: 1 Gabisa digunakan kata pak Agus Wiranto" value="<?= e($form_data['kabel_roll_catatan']) ?>">
+                            <label for="kabel_roll_catatan" class="form-label small fw-semibold text-muted">
+                                Keterangan Kerusakan Kabel Roll (Opsional)
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-circle-info"></i></span>
+                                <input type="text" class="form-control" id="kabel_roll_catatan" name="kabel_roll_catatan" placeholder="Contoh: 1 Gabisa digunakan kata pak Agus Wiranto" value="<?= e($form_data['kabel_roll_catatan']) ?>">
+                            </div>
                         </div>
+
                     </div>
                 </div>
             </div>
 
-            <!-- Bagian 3: Inventaris Proyektor -->
-            <div class="card mb-4 border-start border-primary border-4">
+            <!-- KARTU 3: Inventaris Proyektor -->
+            <div class="card mb-4 card-hover-lift border-start border-primary border-4">
                 <div class="card-header py-3 d-flex align-items-center justify-content-between">
                     <div class="d-flex align-items-center gap-2">
-                        <i class="fa-solid fa-video text-primary fs-5"></i>
-                        <span class="fw-bold">Inventaris Proyektor</span>
+                        <div class="stat-icon-box stat-primary" style="width: 38px; height: 38px; font-size: 1.1rem;">
+                            <i class="fa-solid fa-video"></i>
+                        </div>
+                        <span class="fw-bold">3. Inventaris Proyektor Lab</span>
                     </div>
-                    <span class="badge bg-primary-subtle text-primary fs-6" id="total_proyektor_display">0 Unit</span>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="small text-muted d-none d-sm-inline">Total Fisik:</span>
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle fs-6" id="total_proyektor_display">
+                            <?= (int)$form_data['proyektor_tersedia'] + (int)$form_data['proyektor_rusak'] ?> Unit
+                        </span>
+                    </div>
                 </div>
                 <div class="card-body">
-                    <div class="row g-3">
+                    <div class="row g-4">
+                        
+                        <!-- Proyektor Siap -->
                         <div class="col-12 col-md-6">
-                            <label for="proyektor_tersedia" class="form-label small fw-semibold text-primary">
-                                <i class="fa-solid fa-check-circle me-1"></i> Proyektor Siap Pakai / Tersedia
-                            </label>
-                            <input type="number" class="form-control form-control-lg fw-bold" id="proyektor_tersedia" name="proyektor_tersedia" min="0" value="<?= (int)$form_data['proyektor_tersedia'] ?>" required>
-                            <div class="form-text small">Jumlah proyektor dalam kondisi baik lengkap dengan kabel.</div>
+                            <div class="p-3 bg-body-tertiary rounded-3 border">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <label for="proyektor_tersedia" class="form-label small fw-bold text-primary mb-0">
+                                        <i class="fa-solid fa-circle-check me-1"></i> Proyektor Siap Digunakan
+                                    </label>
+                                    <span class="badge bg-primary-subtle text-primary small">Normal & Siap</span>
+                                </div>
+                                <div class="number-stepper">
+                                    <button type="button" class="stepper-btn btn-minus" title="Kurangi"><i class="fa-solid fa-minus"></i></button>
+                                    <input type="number" id="proyektor_tersedia" name="proyektor_tersedia" min="0" value="<?= (int)$form_data['proyektor_tersedia'] ?>" required>
+                                    <button type="button" class="stepper-btn btn-plus" title="Tambah"><i class="fa-solid fa-plus"></i></button>
+                                </div>
+                                <div class="small text-muted mt-2">Unit proyektor berfungsi baik, lengkap dengan kabel power & HDMI.</div>
+                            </div>
                         </div>
+
+                        <!-- Proyektor Rusak -->
                         <div class="col-12 col-md-6">
-                            <label for="proyektor_rusak" class="form-label small fw-semibold text-danger">
-                                <i class="fa-solid fa-triangle-exclamation me-1"></i> Proyektor Rusak / Kurang Kabel
-                            </label>
-                            <input type="number" class="form-control form-control-lg fw-bold" id="proyektor_rusak" name="proyektor_rusak" min="0" value="<?= (int)$form_data['proyektor_rusak'] ?>">
-                            <div class="form-text small">Unit mati total, lampu redup, atau kabel power/HDMI kurang.</div>
+                            <div class="p-3 bg-body-tertiary rounded-3 border">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <label for="proyektor_rusak" class="form-label small fw-bold text-danger mb-0">
+                                        <i class="fa-solid fa-triangle-exclamation me-1"></i> Rusak / Kurang Kabel
+                                    </label>
+                                    <span class="badge bg-danger-subtle text-danger small">Trouble</span>
+                                </div>
+                                <div class="number-stepper">
+                                    <button type="button" class="stepper-btn btn-minus" title="Kurangi"><i class="fa-solid fa-minus"></i></button>
+                                    <input type="number" id="proyektor_rusak" name="proyektor_rusak" min="0" value="<?= (int)$form_data['proyektor_rusak'] ?>">
+                                    <button type="button" class="stepper-btn btn-plus" title="Tambah"><i class="fa-solid fa-plus"></i></button>
+                                </div>
+                                <div class="small text-muted mt-2">Lampu mati, overheat, port VGA/HDMI rusak, atau kabel hilang.</div>
+                            </div>
                         </div>
+
+                        <!-- Catatan Proyektor -->
                         <div class="col-12">
-                            <label for="proyektor_catatan" class="form-label small fw-semibold">Keterangan / Lokasi Kendala Proyektor</label>
-                            <input type="text" class="form-control" id="proyektor_catatan" name="proyektor_catatan" placeholder="Contoh: 5 Unit rusak / kurang kabel di Lab 3" value="<?= e($form_data['proyektor_catatan']) ?>">
+                            <label for="proyektor_catatan" class="form-label small fw-semibold text-muted">
+                                Keterangan Kerusakan / Detail Proyektor (Opsional)
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-screwdriver-wrench"></i></span>
+                                <input type="text" class="form-control" id="proyektor_catatan" name="proyektor_catatan" placeholder="Contoh: 5 Unit rusak / kurang kabel power di rak Lab 4" value="<?= e($form_data['proyektor_catatan']) ?>">
+                            </div>
                         </div>
+
                     </div>
                 </div>
             </div>
 
-            <!-- Bagian 4: Catatan Operasional & Bukti Foto -->
-            <div class="card mb-4">
-                <div class="card-header py-3">
-                    <i class="fa-solid fa-camera-retro text-warning me-2"></i>Catatan Operasional & Dokumentasi Foto
+            <!-- KARTU 4: Memo Operasional & Upload Foto -->
+            <div class="card mb-4 card-hover-lift">
+                <div class="card-header py-3 d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="stat-icon-box stat-secondary" style="width: 38px; height: 38px; font-size: 1.1rem;">
+                            <i class="fa-solid fa-bullhorn text-warning"></i>
+                        </div>
+                        <span class="fw-bold">4. Memo Operasional & Foto Dokumentasi</span>
+                    </div>
                 </div>
                 <div class="card-body">
-                    <div class="row g-3">
+                    <div class="row g-4">
+                        
+                        <!-- Catatan / Memo Umum -->
                         <div class="col-12">
-                            <label for="catatan_umum" class="form-label small fw-semibold">Catatan Khusus / Memo Operasional Aslab</label>
-                            <textarea class="form-control" id="catatan_umum" name="catatan_umum" rows="3" placeholder="Contoh: semua kabel baru di kardus ini bisa dipake mulai hari ini"><?= e($form_data['catatan_umum']) ?></textarea>
-                            <div class="form-text small">Informasi penting untuk aslab shift berikutnya atau pengumuman barang baru datang.</div>
+                            <label for="catatan_umum" class="form-label small fw-semibold text-muted">
+                                Catatan Khusus / Pesan untuk Shift Berikutnya
+                            </label>
+                            <textarea class="form-control" id="catatan_umum" name="catatan_umum" rows="3" placeholder="Contoh: Semua kabel baru di kardus PRODI TI S1 ini bisa dipake mulai hari ini."><?= e($form_data['catatan_umum']) ?></textarea>
+                            <div class="form-text small">Informasi ini akan otomatis masuk ke format pesan WhatsApp dan pengumuman dashboard.</div>
                         </div>
+
+                        <!-- Drag and Drop Upload Foto -->
                         <div class="col-12">
-                            <label for="foto_dokumentasi" class="form-label small fw-semibold">Upload Foto Bukti (Kardus Kabel / Fisik Rusak)</label>
-                            <input type="file" class="form-control" id="foto_dokumentasi" name="foto_dokumentasi" accept="image/jpeg,image/png,image/webp">
-                            <div class="form-text small">Format: JPG, PNG, WEBP. Maksimal 5 MB.</div>
+                            <label class="form-label small fw-semibold text-muted">
+                                Upload Foto Dokumentasi (Kardus Kabel / Bukti Fisik Rusak)
+                            </label>
                             
-                            <!-- Container Preview Gambar -->
-                            <div id="image_preview_box" class="image-preview-container mt-3 d-none">
-                                <img id="preview_img" src="#" alt="Preview Foto">
+                            <input type="file" class="d-none" id="foto_dokumentasi" name="foto_dokumentasi" accept="image/jpeg,image/png,image/webp">
+
+                            <div class="upload-dropzone" id="upload_dropzone">
+                                <div class="dropzone-icon">
+                                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                                </div>
+                                <h6 class="fw-bold mb-1">Klik atau Geser Foto ke Sini</h6>
+                                <p class="text-muted small mb-0">Format didukung: <strong>JPG, PNG, WEBP</strong> (Maksimal 5 MB)</p>
                             </div>
+
+                            <!-- Live Image Preview Container -->
+                            <div id="image_preview_box" class="mt-3 p-3 bg-body-tertiary rounded-3 border d-none position-relative">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <span class="small fw-bold text-success"><i class="fa-solid fa-circle-check me-1"></i> Foto Siap Diupload:</span>
+                                    <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2" id="btn_remove_preview">
+                                        <i class="fa-solid fa-trash me-1"></i> Hapus Foto
+                                    </button>
+                                </div>
+                                <div class="image-preview-container" style="height: 200px;">
+                                    <img id="preview_img" src="#" alt="Preview Foto">
+                                </div>
+                            </div>
+
                         </div>
+
                     </div>
                 </div>
             </div>
 
-            <!-- Tombol Aksi -->
-            <div class="d-flex justify-content-end gap-2 mb-5">
-                <a href="index.php" class="btn btn-outline-secondary px-4">Batal</a>
-                <button type="submit" class="btn btn-primary px-4 d-flex align-items-center gap-2 shadow-sm">
-                    <i class="fa-solid fa-floppy-disk"></i>
-                    <span>Simpan Laporan Harian</span>
-                </button>
+            <!-- Sticky Live Summary Bar & Action Button -->
+            <div class="form-live-summary-card mb-5">
+                <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                    <div class="d-flex flex-wrap align-items-center gap-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-plug text-warning"></i>
+                            <span class="small text-muted">Kabel:</span>
+                            <span class="fw-bold" id="live_summary_kabel">10 Unit Siap</span>
+                        </div>
+                        <span class="text-muted opacity-50">&bull;</span>
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-video text-primary"></i>
+                            <span class="small text-muted">Proyektor:</span>
+                            <span class="fw-bold" id="live_summary_proyektor">38 Unit Siap</span>
+                        </div>
+                        <span class="text-muted opacity-50">&bull;</span>
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-business-time text-secondary"></i>
+                            <span class="badge bg-primary-subtle text-primary border" id="live_summary_shift">Shift Pagi</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="index.php" class="btn btn-outline-secondary px-3">Batal</a>
+                        <button type="submit" class="btn btn-primary px-4 d-flex align-items-center gap-2 shadow">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            <span>Simpan & Buat Format WA</span>
+                        </button>
+                    </div>
+                </div>
             </div>
 
         </form>
@@ -302,4 +490,3 @@ require_once __DIR__ . '/includes/header.php';
 </div>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
-
