@@ -1,0 +1,124 @@
+/**
+ * ASLAB REPORT - THEME DESIGN TOKENS
+ * Mendukung Dark Mode & Light Mode dengan Kontras Tinggi
+ */
+
+:root {
+    /* Brand & Accent Colors */
+    --primary: #3b82f6;
+    --primary-hover: #2563eb;
+    --primary-glow: rgba(59, 130, 246, 0.25);
+    
+    /* Warna Khas Aslab UNPAM (Orange PDH) */
+    --unpam-orange: #ea580c;
+    --unpam-orange-light: #f97316;
+    --unpam-orange-glow: rgba(249, 115, 22, 0.25);
+
+    --success: #10b981;
+    --success-glow: rgba(16, 185, 129, 0.2);
+    --danger: #ef4444;
+    --danger-glow: rgba(239, 68, 68, 0.2);
+    --warning: #f59e0b;
+    --info: #06b6d4;
+
+    /* Light Theme (Default) */
+    --bg-body: #f8fafc;
+    --bg-surface: #ffffff;
+    --card-bg: #ffffff;
+    --card-surface: #f1f5f9;
+    --card-border: #e2e8f0;
+    --card-border-glow: rgba(59, 130, 246, 0.15);
+    
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --text-inverse: #ffffff;
+    
+    --navbar-bg: rgba(255, 255, 255, 0.85);
+    --table-th-bg: #f8fafc;
+    --table-hover: rgba(59, 130, 246, 0.04);
+    
+    --input-bg: #ffffff;
+    --input-border: #cbd5e1;
+    --input-focus-border: #3b82f6;
+    
+    --wa-box-bg: #f0fdf4;
+    --wa-box-border: #86efac;
+    --wa-box-text: #14532d;
+    
+    --glass-bg: rgba(255, 255, 255, 0.85);
+    --glass-border: rgba(226, 232, 240, 0.8);
+    
+    --hero-gradient: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(249, 115, 22, 0.08) 100%);
+    --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    --card-shadow-hover: 0 12px 24px -4px rgba(0, 0, 0, 0.08), 0 6px 12px -3px rgba(0, 0, 0, 0.04);
+}
+
+/* Dark Theme Overrides */
+[data-bs-theme="dark"] {
+    --primary: #60a5fa;
+    --primary-hover: #3b82f6;
+    --primary-glow: rgba(96, 165, 250, 0.3);
+
+    --unpam-orange: #f97316;
+    --unpam-orange-light: #fb923c;
+    --unpam-orange-glow: rgba(249, 115, 22, 0.35);
+
+    --success: #34d399;
+    --success-glow: rgba(52, 211, 153, 0.25);
+    --danger: #f87171;
+    --danger-glow: rgba(248, 113, 113, 0.25);
+    --warning: #fbbf24;
+    --info: #38bdf8;
+
+    /* Deep Cyber Midnight Space Palette */
+    --bg-body: #060913;
+    --bg-surface: #0e1526;
+    --card-bg: #0d1527;
+    --card-surface: #141f36;
+    --card-border: rgba(255, 255, 255, 0.08);
+    --card-border-glow: rgba(96, 165, 250, 0.25);
+
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --text-inverse: #0f172a;
+
+    --navbar-bg: rgba(10, 16, 30, 0.85);
+    --table-th-bg: #141f36;
+    --table-hover: rgba(96, 165, 250, 0.06);
+
+    --input-bg: #111a2e;
+    --input-border: #1f2e4d;
+    --input-focus-border: #60a5fa;
+
+    --wa-box-bg: rgba(6, 78, 59, 0.25);
+    --wa-box-border: rgba(16, 185, 129, 0.35);
+    --wa-box-text: #6ee7b7;
+
+    --glass-bg: rgba(13, 21, 39, 0.85);
+    --glass-border: rgba(255, 255, 255, 0.1);
+
+    --hero-gradient: linear-gradient(135deg, rgba(30, 58, 138, 0.35) 0%, rgba(124, 45, 18, 0.3) 100%);
+    --card-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.3);
+    --card-shadow-hover: 0 14px 28px -4px rgba(0, 0, 0, 0.5), 0 0 20px -2px rgba(59, 130, 246, 0.15);
+}
+
+/* Enforce Dark Mode Contrast & Invisibility Fixes */
+[data-bs-theme="dark"] .text-dark,
+[data-bs-theme="dark"] .text-body,
+[data-bs-theme="dark"] h1,
+[data-bs-theme="dark"] h2,
+[data-bs-theme="dark"] h3,
+[data-bs-theme="dark"] h4,
+[data-bs-theme="dark"] h5,
+[data-bs-theme="dark"] h6 {
+    color: var(--text-main) !important;
+}
+
+[data-bs-theme="dark"] .text-secondary {
+    color: #cbd5e1 !important;
+}
+
+[data-bs-theme="dark"] .table td,
+[data-bs-theme="dark"] .table th {
+    color: var(--text-main);
+}

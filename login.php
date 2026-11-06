@@ -81,7 +81,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Custom CSS -->
+    <!-- Modular Custom CSS -->
+    <link rel="stylesheet" href="assets/css/theme.css">
+    <link rel="stylesheet" href="assets/css/animations.css">
+    <link rel="stylesheet" href="assets/css/components.css">
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body class="d-flex align-items-center justify-content-center position-relative" style="min-height: 100vh;">
@@ -176,7 +179,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Three.js Library via CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <!-- App JS -->
+    <!-- Modular App Scripts -->
+    <script src="assets/js/theme.js"></script>
+    <script src="assets/js/animations.js"></script>
     <script src="assets/js/app.js"></script>
 </body>
 </html>

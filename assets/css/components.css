@@ -1,0 +1,186 @@
+/**
+ * ASLAB REPORT - UI COMPONENTS
+ */
+
+/* Hero Welcome Banner */
+.hero-welcome-card {
+    background: var(--hero-gradient);
+    border: 1px solid var(--card-border);
+    border-radius: 1.25rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+}
+
+.hero-welcome-card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 350px;
+    height: 350px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--unpam-orange-glow) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Base Card Styling */
+.card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 1rem;
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-header {
+    background-color: var(--card-bg);
+    border-bottom: 1px solid var(--card-border);
+    padding: 1.1rem 1.35rem;
+    font-weight: 600;
+    border-top-left-radius: 1rem !important;
+    border-top-right-radius: 1rem !important;
+}
+
+.card-body {
+    padding: 1.35rem;
+}
+
+/* Stat Box & Badges */
+.stat-icon-box {
+    width: 52px;
+    height: 52px;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.stat-icon-box.stat-primary {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--primary);
+}
+
+.stat-icon-box.stat-orange {
+    background: rgba(249, 115, 22, 0.15);
+    color: var(--unpam-orange);
+}
+
+.stat-icon-box.stat-success {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--success);
+}
+
+.stat-icon-box.stat-secondary {
+    background: rgba(100, 116, 139, 0.15);
+    color: var(--text-muted);
+}
+
+.card:hover .stat-icon-box {
+    transform: scale(1.12) rotate(4deg);
+}
+
+/* Form Controls */
+.form-control, .form-select {
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    color: var(--text-main);
+    border-radius: 0.6rem;
+    padding: 0.65rem 0.95rem;
+    transition: all 0.25s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: var(--input-bg);
+    color: var(--text-main);
+    border-color: var(--input-focus-border);
+    box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+.input-group-text {
+    background-color: var(--table-th-bg) !important;
+    border-color: var(--input-border) !important;
+    color: var(--primary) !important;
+    border-radius: 0.6rem 0 0 0.6rem;
+}
+
+.input-group-text i {
+    color: var(--primary) !important;
+}
+
+/* Custom Table */
+.table {
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--text-main);
+    --bs-table-hover-bg: var(--table-hover);
+    border-color: var(--card-border);
+}
+
+.table th {
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    background-color: var(--table-th-bg) !important;
+    border-top: none;
+    border-bottom: 1px solid var(--card-border);
+    padding: 0.85rem 1rem;
+}
+
+.table td {
+    padding: 0.95rem 1rem;
+    color: var(--text-main);
+    border-bottom: 1px solid var(--card-border);
+}
+
+/* WhatsApp Box */
+.whatsapp-box {
+    background-color: var(--wa-box-bg);
+    border: 1px solid var(--wa-box-border);
+    border-radius: 0.75rem;
+    padding: 1.15rem;
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    color: var(--wa-box-text);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03);
+}
+
+/* Theme Toggle Button */
+.theme-toggle-btn {
+    border-radius: 0.6rem;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--card-border);
+    background-color: var(--card-bg);
+    color: var(--text-main);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.theme-toggle-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: rotate(20deg) scale(1.08);
+    box-shadow: 0 0 12px var(--primary-glow);
+}
+
+/* Modern Pill Badges */
+.badge-unpam {
+    background: linear-gradient(135deg, var(--unpam-orange) 0%, #c2410c 100%);
+    color: #ffffff;
+    font-weight: 600;
+    padding: 0.35rem 0.7rem;
+    border-radius: 2rem;
+    font-size: 0.75rem;
+    box-shadow: 0 2px 6px var(--unpam-orange-glow);
+}

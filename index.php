@@ -56,18 +56,46 @@ if ($latest) {
 }
 ?>
 
-<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
-    <div>
-        <h2 class="h4 mb-1 fw-bold">
-            <i class="fa-solid fa-chart-pie text-primary me-2"></i>Dashboard Inventaris Lab
-        </h2>
-        <p class="text-muted small mb-0">Status ketersediaan kabel roll, proyektor, dan catatan operasional shift.</p>
-    </div>
-    <div class="d-flex gap-2">
-        <a href="buat-laporan.php" class="btn btn-primary d-flex align-items-center gap-2 shadow-sm">
-            <i class="fa-solid fa-file-circle-plus"></i>
-            <span>Buat Laporan Baru</span>
-        </a>
+<!-- Hero Welcome Banner with Interactive 3D Aslab Character (Orange PDH UNPAM) -->
+<div class="hero-welcome-card p-4 p-md-5 mb-4 animate-fade-up border-gradient-top">
+    <div class="row align-items-center g-4">
+        <div class="col-12 col-md-7 col-lg-8">
+            <div class="hologram-tag mb-3">
+                <i class="fa-solid fa-atom"></i>
+                <span>Asisten Laboratorium &bull; Universitas Pamulang</span>
+            </div>
+            <h1 class="h3 fw-bold mb-2">
+                Halo, <?= e($user ? $user['nama_lengkap'] : 'Rekan Aslab') ?>! 👋
+            </h1>
+            <p class="text-muted mb-4 small" style="max-width: 580px; line-height: 1.6;">
+                Sistem monitoring kondisi proyektor, kabel roll, dan serah terima shift Lab Komputer Informatika UNPAM. Pastikan semua perlengkapan terdata dengan rapi sebelum kelas dimulai.
+            </p>
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <a href="buat-laporan.php" class="btn btn-primary d-flex align-items-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-plus-circle"></i>
+                    <span>Input Laporan Shift Ini</span>
+                </a>
+                <a href="riwayat.php" class="btn btn-outline-secondary d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span>Lihat Semua Arsip</span>
+                </a>
+                <span class="badge bg-body-tertiary text-body border p-2 px-3 small ms-md-2">
+                    <i class="fa-regular fa-calendar-check text-primary me-1"></i>
+                    <?= date('l, d F Y') ?>
+                </span>
+            </div>
+        </div>
+
+        <!-- 3D Interactive Avatar Viewport -->
+        <div class="col-12 col-md-5 col-lg-4 text-center position-relative">
+            <div class="avatar-3d-wrapper">
+                <canvas id="aslab-avatar-canvas" class="avatar-3d-canvas"></canvas>
+            </div>
+            <div class="small text-muted mt-1" style="font-size: 0.72rem; letter-spacing: 0.02em;">
+                <i class="fa-solid fa-hand-pointer me-1 text-primary"></i> 
+                <strong>3D Aslab UNPAM (Baju PDH Oranye)</strong> &bull; Gerakkan kursor
+            </div>
+        </div>
     </div>
 </div>
 
@@ -83,7 +111,7 @@ if ($latest) {
             <div class="card card-hover-lift h-100 p-3 border-start border-primary border-4">
                 <div class="d-flex align-items-center justify-content-between mb-2">
                     <span class="text-muted small fw-semibold text-uppercase">Proyektor Siap</span>
-                    <div class="stat-icon-box bg-primary-subtle text-primary">
+                    <div class="stat-icon-box stat-primary">
                         <i class="fa-solid fa-video"></i>
                     </div>
                 </div>
@@ -93,21 +121,21 @@ if ($latest) {
                 </div>
                 <div class="small text-danger d-flex align-items-center gap-1">
                     <i class="fa-solid fa-triangle-exclamation"></i>
-                    <span><?= (int)$latest['proyektor_rusak'] ?> rusak / kurang kabel</span>
+                    <span><?= (int)$latest['proyektor_rusak'] ?> trouble / kurang kabel</span>
                 </div>
             </div>
         </div>
 
         <!-- Kabel Roll Card -->
         <div class="col-12 col-md-6 col-lg-3 animate-fade-up delay-2">
-            <div class="card card-hover-lift h-100 p-3 border-start border-success border-4">
+            <div class="card card-hover-lift h-100 p-3 border-start border-warning border-4">
                 <div class="d-flex align-items-center justify-content-between mb-2">
                     <span class="text-muted small fw-semibold text-uppercase">Kabel Roll Siap</span>
-                    <div class="stat-icon-box bg-success-subtle text-success">
+                    <div class="stat-icon-box stat-orange">
                         <i class="fa-solid fa-plug"></i>
                     </div>
                 </div>
-                <div class="h3 fw-bold mb-1 text-success">
+                <div class="h3 fw-bold mb-1" style="color: var(--unpam-orange-light);">
                     <span class="counter-value" data-target="<?= (int)$latest['kabel_roll_tersedia'] ?>"><?= (int)$latest['kabel_roll_tersedia'] ?></span>
                     <span class="fs-6 fw-normal text-muted">/ <?= $tot_kabel_latest ?> Unit</span>
                 </div>
@@ -123,7 +151,7 @@ if ($latest) {
             <div class="card card-hover-lift h-100 p-3 border-start border-info border-4">
                 <div class="d-flex align-items-center justify-content-between mb-2">
                     <span class="text-muted small fw-semibold text-uppercase">Petugas Terakhir</span>
-                    <div class="stat-icon-box bg-info-subtle text-info">
+                    <div class="stat-icon-box stat-primary">
                         <i class="fa-solid fa-user-check"></i>
                     </div>
                 </div>
@@ -140,7 +168,7 @@ if ($latest) {
             <div class="card card-hover-lift h-100 p-3 border-start border-secondary border-4">
                 <div class="d-flex align-items-center justify-content-between mb-2">
                     <span class="text-muted small fw-semibold text-uppercase">Total Arsip</span>
-                    <div class="stat-icon-box bg-secondary-subtle text-secondary">
+                    <div class="stat-icon-box stat-secondary">
                         <i class="fa-solid fa-folder-closed"></i>
                     </div>
                 </div>
