@@ -55,6 +55,13 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 
                     record_log('LOGIN_SUCCESS', "Login berhasil sebagai '{$user['nama_lengkap']}' ({$user['role']})", 'SUCCESS', $user['username']);
 
+                    // Role-Based Redirect Guard (Defense-in-Depth):
+                    // Jika akun bukan admin tetapi mencoba redirect ke halaman admin, arahkan ke index.php
+                    $admin_only_pages = ['kelola-aslab.php', 'log-aktivitas.php'];
+                    if ($user['role'] !== 'admin' && in_array($base_target, $admin_only_pages)) {
+                        $redirect = 'index.php';
+                    }
+
                     set_flash('success', "Selamat datang kembali, " . $user['nama_lengkap'] . "!");
                     header("Location: " . $redirect);
                     exit;
