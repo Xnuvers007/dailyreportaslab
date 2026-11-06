@@ -27,7 +27,7 @@ if (!empty($q)) {
     $params[':q'] = '%' . $q . '%';
 }
 
-if (!empty($shift) && in_array($shift, ['Pagi', 'Siang', 'Sore', 'Malam'])) {
+if (!empty($shift) && in_array($shift, ['Pagi', 'Siang', 'Sore', 'Malam', '1 Hari', 'Full Day'])) {
     $sql .= " AND `shift` = :shift";
     $params[':shift'] = $shift;
 }

@@ -33,46 +33,46 @@ $tanggal_akhir= trim($_GET['tanggal_akhir'] ?? '');
 $export_format= strtolower(trim($_GET['export'] ?? ''));
 
 // Query Builder
-$sql = "SELECT * FROM `activity_logs` WHERE 1=1";
+$where_clauses = ["1=1"];
 $params = [];
 
 if (!empty($q)) {
-    $sql .= " AND (`username` LIKE :q OR `description` LIKE :q OR `ip_address` LIKE :q OR `url_path` LIKE :q OR `action` LIKE :q)";
+    $where_clauses[] = "(`username` LIKE :q OR `description` LIKE :q OR `ip_address` LIKE :q OR `url_path` LIKE :q OR `action` LIKE :q)";
     $params[':q'] = '%' . $q . '%';
 }
 
 if (!empty($action_filter)) {
     if ($action_filter === 'AUTH') {
-        $sql .= " AND (`action` LIKE 'LOGIN%' OR `action` = 'LOGOUT')";
+        $where_clauses[] = "(`action` LIKE 'LOGIN%' OR `action` = 'LOGOUT')";
     } elseif ($action_filter === 'REPORT') {
-        $sql .= " AND (`action` LIKE '%REPORT%' OR `action` LIKE 'EXPORT%')";
+        $where_clauses[] = "(`action` LIKE '%REPORT%' OR `action` LIKE 'EXPORT%')";
     } elseif ($action_filter === 'USERS') {
-        $sql .= " AND `action` IN ('CREATE_USER', 'RESET_PASSWORD', 'DELETE_USER')";
+        $where_clauses[] = "`action` IN ('CREATE_USER', 'RESET_PASSWORD', 'DELETE_USER')";
     } elseif ($action_filter === 'NAVIGATE') {
-        $sql .= " AND `action` LIKE 'NAVIGATE%'";
+        $where_clauses[] = "`action` LIKE 'NAVIGATE%'";
     } else {
-        $sql .= " AND `action` = :act";
+        $where_clauses[] = "`action` = :act";
         $params[':act'] = $action_filter;
     }
 }
 
 if (!empty($status_filter)) {
-    $sql .= " AND `status` = :st";
+    $where_clauses[] = "`status` = :st";
     $params[':st'] = $status_filter;
 }
 
 if (!empty($tanggal_mulai) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $tanggal_mulai)) {
-    $sql .= " AND DATE(`created_at`) >= :tgl_mulai";
+    $where_clauses[] = "DATE(`created_at`) >= :tgl_mulai";
     $params[':tgl_mulai'] = $tanggal_mulai;
 }
 
 if (!empty($tanggal_akhir) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $tanggal_akhir)) {
-    $sql .= " AND DATE(`created_at`) <= :tgl_akhir";
+    $where_clauses[] = "DATE(`created_at`) <= :tgl_akhir";
     $params[':tgl_akhir'] = $tanggal_akhir;
 }
 
-// Order by Terbaru
-$sql .= " ORDER BY `id` DESC";
+$where_sql = implode(' AND ', $where_clauses);
+$sql = "SELECT * FROM `activity_logs` WHERE {$where_sql} ORDER BY `id` DESC";
 
 // Jika Ekspor Diminta (Excel / CSV)
 if ($export_format === 'excel' || $export_format === 'csv') {
@@ -176,7 +176,7 @@ $per_page = 50;
 $offset = ($page - 1) * $per_page;
 
 // Hitung Total Log untuk Pagination
-$stmt_count = $pdo->prepare("SELECT COUNT(*) FROM `activity_logs` WHERE 1=1" . substr($sql, strpos($sql, "WHERE 1=1") + 9, strpos($sql, "ORDER BY") - (strpos($sql, "WHERE 1=1") + 9)));
+$stmt_count = $pdo->prepare("SELECT COUNT(*) FROM `activity_logs` WHERE {$where_sql}");
 $stmt_count->execute($params);
 $total_rows = (int)$stmt_count->fetchColumn();
 $total_pages = ceil($total_rows / $per_page);
@@ -348,18 +348,20 @@ require_once __DIR__ . '/includes/header.php';
                 </a>
             </div>
 
-            <!-- Form Pencarian & Filter Lengkap -->
-            <form method="GET" action="log-aktivitas.php" class="row g-3 align-items-end">
-                <div class="col-12 col-md-4">
-                    <label class="form-label small fw-semibold text-muted">Cari Kata Kunci / User / IP / Deskripsi</label>
+            <!-- Form Pencarian & Filter Lengkap yang Responsif -->
+            <form method="GET" action="log-aktivitas.php" class="row g-2 g-md-3 align-items-end">
+                <!-- Kata Kunci -->
+                <div class="col-12 col-md-6 col-lg-3">
+                    <label class="form-label small fw-semibold text-muted mb-1">Cari Kata Kunci / User / IP</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></span>
-                        <input type="text" class="form-control" name="q" placeholder="Contoh: admin, 192.168, login..." value="<?= e($q) ?>">
+                        <input type="text" class="form-control" name="q" placeholder="Cari nama, IP, aksi..." value="<?= e($q) ?>">
                     </div>
                 </div>
 
-                <div class="col-6 col-md-2">
-                    <label class="form-label small fw-semibold text-muted">Kategori Aksi</label>
+                <!-- Kategori Aksi -->
+                <div class="col-6 col-md-3 col-lg-2">
+                    <label class="form-label small fw-semibold text-muted mb-1">Kategori Aksi</label>
                     <select class="form-select" name="action_filter">
                         <option value="">Semua Aksi</option>
                         <option value="AUTH" <?= $action_filter === 'AUTH' ? 'selected' : '' ?>>Login & Logout</option>
@@ -369,8 +371,9 @@ require_once __DIR__ . '/includes/header.php';
                     </select>
                 </div>
 
-                <div class="col-6 col-md-2">
-                    <label class="form-label small fw-semibold text-muted">Status</label>
+                <!-- Status -->
+                <div class="col-6 col-md-3 col-lg-2">
+                    <label class="form-label small fw-semibold text-muted mb-1">Status</label>
                     <select class="form-select" name="status_filter">
                         <option value="">Semua Status</option>
                         <option value="SUCCESS" <?= $status_filter === 'SUCCESS' ? 'selected' : '' ?>>SUCCESS</option>
@@ -380,21 +383,26 @@ require_once __DIR__ . '/includes/header.php';
                     </select>
                 </div>
 
-                <div class="col-6 col-md-2">
-                    <label class="form-label small fw-semibold text-muted">Dari Tanggal</label>
+                <!-- Dari Tanggal -->
+                <div class="col-6 col-md-4 col-lg-2">
+                    <label class="form-label small fw-semibold text-muted mb-1">Dari Tanggal</label>
                     <input type="date" class="form-control" name="tanggal_mulai" value="<?= e($tanggal_mulai) ?>">
                 </div>
 
-                <div class="col-6 col-md-2 d-flex gap-2">
-                    <div class="flex-grow-1">
-                        <label class="form-label small fw-semibold text-muted">Sampai Tanggal</label>
-                        <input type="date" class="form-control" name="tanggal_akhir" value="<?= e($tanggal_akhir) ?>">
-                    </div>
-                    <button type="submit" class="btn btn-primary d-flex align-items-center justify-content-center px-3" title="Terapkan Filter" style="height: 38px; align-self: flex-end;">
+                <!-- Sampai Tanggal -->
+                <div class="col-6 col-md-4 col-lg-2">
+                    <label class="form-label small fw-semibold text-muted mb-1">Sampai Tanggal</label>
+                    <input type="date" class="form-control" name="tanggal_akhir" value="<?= e($tanggal_akhir) ?>">
+                </div>
+
+                <!-- Tombol Terapkan & Reset (Responsif Penuh di Semua Layar) -->
+                <div class="col-12 col-md-4 col-lg-1 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-fill d-flex align-items-center justify-content-center gap-1 shadow-sm px-2" title="Terapkan Filter" style="height: 38px;">
                         <i class="fa-solid fa-filter"></i>
+                        <span class="d-inline d-lg-none"> Terapkan</span>
                     </button>
                     <?php if (!empty($q) || !empty($action_filter) || !empty($status_filter) || !empty($tanggal_mulai) || !empty($tanggal_akhir)): ?>
-                        <a href="log-aktivitas.php" class="btn btn-outline-secondary d-flex align-items-center justify-content-center px-2" title="Reset Filter" style="height: 38px; align-self: flex-end;">
+                        <a href="log-aktivitas.php" class="btn btn-outline-secondary d-flex align-items-center justify-content-center shadow-sm px-3" title="Reset Filter" style="height: 38px;">
                             <i class="fa-solid fa-rotate-left"></i>
                         </a>
                     <?php endif; ?>

@@ -35,12 +35,14 @@ try {
     $laporan = $stmt->fetch();
 
     if ($laporan) {
-        // Hapus file fisik foto secara aman jika ada
+        // Hapus file fisik foto secara aman jika ada (Anti-Path-Traversal)
         if (!empty($laporan['foto_dokumentasi'])) {
             $safe_filename = basename($laporan['foto_dokumentasi']);
-            $file_path = __DIR__ . '/uploads/' . $safe_filename;
-            if (file_exists($file_path) && is_file($file_path)) {
-                @unlink($file_path);
+            $uploads_dir   = realpath(__DIR__ . '/uploads');
+            $file_path     = __DIR__ . '/uploads/' . $safe_filename;
+            $real_file     = realpath($file_path);
+            if ($real_file && $uploads_dir && strpos($real_file, $uploads_dir) === 0 && is_file($real_file)) {
+                @unlink($real_file);
             }
         }
 

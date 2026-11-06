@@ -277,7 +277,10 @@ require_once __DIR__ . '/includes/header.php';
                         <div class="stat-icon-box stat-orange" style="width: 38px; height: 38px; font-size: 1.1rem;">
                             <i class="fa-solid fa-plug"></i>
                         </div>
-                        <span class="fw-bold">2. Inventaris Kabel Roll / Stop Kontak</span>
+                        <div>
+                            <span class="fw-bold">2. Inventaris Kabel Roll / Stop Kontak</span>
+                            <span class="badge bg-secondary-subtle text-muted ms-2 small">Opsional</span>
+                        </div>
                     </div>
                     <div class="d-flex align-items-center gap-2">
                         <span class="small text-muted d-none d-sm-inline">Total Fisik:</span>
@@ -287,6 +290,9 @@ require_once __DIR__ . '/includes/header.php';
                     </div>
                 </div>
                 <div class="card-body">
+                    <p class="small text-muted mb-3">
+                        <i class="fa-solid fa-circle-info text-primary me-1"></i>Boleh dikosongkan atau diisi 0 jika shift ini hanya membuat catatan memo / operasional lab saja.
+                    </p>
                     <div class="row g-4">
                         
                         <!-- Kabel Siap -->
@@ -300,7 +306,7 @@ require_once __DIR__ . '/includes/header.php';
                                 </div>
                                 <div class="number-stepper">
                                     <button type="button" class="stepper-btn btn-minus" title="Kurangi"><i class="fa-solid fa-minus"></i></button>
-                                    <input type="number" id="kabel_roll_tersedia" name="kabel_roll_tersedia" min="0" value="<?= (int)$form_data['kabel_roll_tersedia'] ?>" required>
+                                    <input type="number" id="kabel_roll_tersedia" name="kabel_roll_tersedia" min="0" value="<?= (int)$form_data['kabel_roll_tersedia'] ?>">
                                     <button type="button" class="stepper-btn btn-plus" title="Tambah"><i class="fa-solid fa-plus"></i></button>
                                 </div>
                                 <div class="small text-muted mt-2">Kabel roll kondisi normal yang bisa dipinjamkan.</div>
@@ -347,7 +353,10 @@ require_once __DIR__ . '/includes/header.php';
                         <div class="stat-icon-box stat-primary" style="width: 38px; height: 38px; font-size: 1.1rem;">
                             <i class="fa-solid fa-video"></i>
                         </div>
-                        <span class="fw-bold">3. Inventaris Proyektor Lab</span>
+                        <div>
+                            <span class="fw-bold">3. Inventaris Proyektor Lab</span>
+                            <span class="badge bg-secondary-subtle text-muted ms-2 small">Opsional</span>
+                        </div>
                     </div>
                     <div class="d-flex align-items-center gap-2">
                         <span class="small text-muted d-none d-sm-inline">Total Fisik:</span>
@@ -357,6 +366,9 @@ require_once __DIR__ . '/includes/header.php';
                     </div>
                 </div>
                 <div class="card-body">
+                    <p class="small text-muted mb-3">
+                        <i class="fa-solid fa-circle-info text-primary me-1"></i>Boleh dikosongkan atau diisi 0 jika shift ini hanya membuat catatan memo / operasional lab saja.
+                    </p>
                     <div class="row g-4">
                         
                         <!-- Proyektor Siap -->
@@ -370,9 +382,12 @@ require_once __DIR__ . '/includes/header.php';
                                 </div>
                                 <div class="number-stepper">
                                     <button type="button" class="stepper-btn btn-minus" title="Kurangi"><i class="fa-solid fa-minus"></i></button>
-                                    <input type="number" id="proyektor_tersedia" name="proyektor_tersedia" min="0" value="<?= (int)$form_data['proyektor_tersedia'] ?>" required>
+                                    <input type="number" id="proyektor_tersedia" name="proyektor_tersedia" min="0" value="<?= (int)$form_data['proyektor_tersedia'] ?>">
                                     <button type="button" class="stepper-btn btn-plus" title="Tambah"><i class="fa-solid fa-plus"></i></button>
                                 </div>
+                                <div class="small text-muted mt-2">Unit proyektor berfungsi baik, lengkap dengan kabel power & HDMI.</div>
+                            </div>
+                        </div>
                                 <div class="small text-muted mt-2">Unit proyektor berfungsi baik, lengkap dengan kabel power & HDMI.</div>
                             </div>
                         </div>

@@ -13,9 +13,13 @@ if (is_logged_in()) {
 $error = null;
 $flash = get_flash();
 
-// Validasi Redirect Aman (Anti-Open Redirect)
+// Validasi Redirect Aman (Anti-Open Redirect dengan Whitelist Ketat)
 $redirect = $_GET['redirect'] ?? $_POST['redirect'] ?? 'index.php';
-if (preg_match('/^(https?:|\/\/)/i', $redirect) || !preg_match('/^[a-zA-Z0-9_\-\.\?=&]+$/', $redirect)) {
+$allowed_targets = ['index.php', 'buat-laporan.php', 'riwayat.php', 'detail.php', 'kelola-aslab.php', 'log-aktivitas.php'];
+$target_path = parse_url($redirect, PHP_URL_PATH) ?: 'index.php';
+$base_target = basename($target_path);
+
+if (!in_array($base_target, $allowed_targets) || preg_match('/^(https?:|\/\/|\\\\)/i', $redirect) || preg_match('/[\\r\\n]/', $redirect)) {
     $redirect = 'index.php';
 }
 
