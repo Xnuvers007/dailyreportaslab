@@ -102,3 +102,4 @@ function purge_old_logs() {
         error_log("Purge Logs Error: " . $e->getMessage());
     }
 }
+
