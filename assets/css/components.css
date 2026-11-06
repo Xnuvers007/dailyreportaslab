@@ -243,6 +243,30 @@
     box-shadow: 0 0 12px var(--primary-glow);
 }
 
+/* ========================================================
+ * Modal Stacking Context & Backdrop Hierarchy Fix
+ * Prevents Backdrop from Covering / Dimming Modals
+ * ======================================================== */
+.modal-backdrop {
+    z-index: 1050 !important;
+}
+
+.modal {
+    z-index: 1060 !important;
+}
+
+.modal-dialog {
+    z-index: 1065 !important;
+    position: relative;
+}
+
+.modal-content {
+    background-color: var(--card-bg) !important;
+    color: var(--text-main) !important;
+    border: 1px solid var(--card-border) !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7) !important;
+}
+
 /* Modern Pill Badges */
 .badge-unpam {
     background: linear-gradient(135deg, var(--unpam-orange) 0%, #c2410c 100%);

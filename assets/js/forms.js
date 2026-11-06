@@ -106,9 +106,17 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // 3. Export Modal Range Selector Controller (Toggle Custom Range Inputs)
+    // 3. Modal Stacking & Backdrop Fix (Pindahkan semua modal ke <body>)
+    document.querySelectorAll('.modal').forEach(modalEl => {
+        if (modalEl.parentNode !== document.body) {
+            document.body.appendChild(modalEl);
+        }
+    });
+
+    // 4. Export Modal Range Selector & Target Controller
     const rangeTypeSelect = document.getElementById('export_range_type');
     const customRangeSection = document.getElementById('export_custom_range_section');
+    const exportForm = document.querySelector('#exportModal form');
 
     if (rangeTypeSelect && customRangeSection) {
         function toggleCustomRange() {
@@ -120,6 +128,27 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         rangeTypeSelect.addEventListener('change', toggleCustomRange);
         toggleCustomRange();
+    }
+
+    if (exportForm) {
+        exportForm.addEventListener('submit', function () {
+            const formatRadio = exportForm.querySelector('input[name="format"]:checked');
+            // Jika Excel: langsung unduh di tab ini (_self). Jika PDF: buka tab baru (_blank)
+            if (formatRadio && formatRadio.value === 'excel') {
+                exportForm.target = '_self';
+            } else {
+                exportForm.target = '_blank';
+            }
+
+            // Tutup modal secara otomatis agar layar tidak tetap gelap
+            const modalEl = document.getElementById('exportModal');
+            if (modalEl && typeof bootstrap !== 'undefined') {
+                const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                if (modalInstance) {
+                    setTimeout(() => modalInstance.hide(), 400);
+                }
+            }
+        });
     }
 
     // 4. Live Sticky Summary Bar Updating (buat-laporan.php)
@@ -150,3 +179,4 @@ document.addEventListener('DOMContentLoaded', function () {
     updateLiveSummary();
 
 });
+

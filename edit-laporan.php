@@ -206,38 +206,40 @@ require_once __DIR__ . '/includes/header.php';
                                 <div class="shift-radio-item">
                                     <input type="radio" id="edit_shift_pagi" name="shift" value="Pagi" <?= $laporan['shift'] === 'Pagi' ? 'checked' : '' ?> required>
                                     <label for="edit_shift_pagi" class="shift-radio-label">
-                                        <i class="fa-solid fa-sun"></i>
+                                        <i class="fa-solid fa-sun text-warning"></i>
                                         <span class="shift-name">Shift Pagi</span>
-                                        <span class="shift-time">07:30 - 12:00</span>
+                                        <span class="shift-time">07:00 - 10:00</span>
                                     </label>
                                 </div>
 
                                 <div class="shift-radio-item">
                                     <input type="radio" id="edit_shift_siang" name="shift" value="Siang" <?= $laporan['shift'] === 'Siang' ? 'checked' : '' ?>>
                                     <label for="edit_shift_siang" class="shift-radio-label">
-                                        <i class="fa-solid fa-cloud-sun"></i>
+                                        <i class="fa-solid fa-cloud-sun text-primary"></i>
                                         <span class="shift-name">Shift Siang</span>
-                                        <span class="shift-time">12:00 - 16:30</span>
-                                    </label>
-                                </div>
-
-                                <div class="shift-radio-item">
-                                    <input type="radio" id="edit_shift_sore" name="shift" value="Sore" <?= $laporan['shift'] === 'Sore' ? 'checked' : '' ?>>
-                                    <label for="edit_shift_sore" class="shift-radio-label">
-                                        <i class="fa-solid fa-cloud-moon"></i>
-                                        <span class="shift-name">Shift Sore</span>
-                                        <span class="shift-time">16:30 - 21:00</span>
+                                        <span class="shift-time">10:00 - 15:00</span>
                                     </label>
                                 </div>
 
                                 <div class="shift-radio-item">
                                     <input type="radio" id="edit_shift_malam" name="shift" value="Malam" <?= $laporan['shift'] === 'Malam' ? 'checked' : '' ?>>
                                     <label for="edit_shift_malam" class="shift-radio-label">
-                                        <i class="fa-solid fa-moon"></i>
+                                        <i class="fa-solid fa-moon text-info"></i>
                                         <span class="shift-name">Shift Malam</span>
-                                        <span class="shift-time">Lembur / Opsional</span>
+                                        <span class="shift-time">16:00 - 21:30</span>
                                     </label>
                                 </div>
+
+                                <?php if ($laporan['shift'] === 'Sore'): ?>
+                                    <div class="shift-radio-item">
+                                        <input type="radio" id="edit_shift_sore" name="shift" value="Sore" checked>
+                                        <label for="edit_shift_sore" class="shift-radio-label">
+                                            <i class="fa-solid fa-cloud-moon text-secondary"></i>
+                                            <span class="shift-name">Shift Sore</span>
+                                            <span class="shift-time">Legacy</span>
+                                        </label>
+                                    </div>
+                                <?php endif; ?>
 
                             </div>
                         </div>

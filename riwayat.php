@@ -195,16 +195,13 @@ require_once __DIR__ . '/includes/header.php';
                     <i class="fa-regular fa-calendar-check"></i> Hari Ini
                 </a>
                 <a href="riwayat.php?shift=Pagi" class="filter-pill <?= $shift === 'Pagi' ? 'active' : '' ?>">
-                    <i class="fa-solid fa-sun"></i> Shift Pagi
+                    <i class="fa-solid fa-sun text-warning"></i> Shift Pagi (07:00 - 10:00)
                 </a>
                 <a href="riwayat.php?shift=Siang" class="filter-pill <?= $shift === 'Siang' ? 'active' : '' ?>">
-                    <i class="fa-solid fa-cloud-sun"></i> Shift Siang
-                </a>
-                <a href="riwayat.php?shift=Sore" class="filter-pill <?= $shift === 'Sore' ? 'active' : '' ?>">
-                    <i class="fa-solid fa-cloud-moon"></i> Shift Sore
+                    <i class="fa-solid fa-cloud-sun text-primary"></i> Shift Siang (10:00 - 15:00)
                 </a>
                 <a href="riwayat.php?shift=Malam" class="filter-pill <?= $shift === 'Malam' ? 'active' : '' ?>">
-                    <i class="fa-solid fa-moon"></i> Shift Malam
+                    <i class="fa-solid fa-moon text-info"></i> Shift Malam (16:00 - 21:30)
                 </a>
             </div>
 
@@ -222,10 +219,12 @@ require_once __DIR__ . '/includes/header.php';
                     <label class="form-label small fw-semibold text-muted">Pilih Shift</label>
                     <select class="form-select" name="shift">
                         <option value="">Semua Shift</option>
-                        <option value="Pagi" <?= $shift === 'Pagi' ? 'selected' : '' ?>>Pagi</option>
-                        <option value="Siang" <?= $shift === 'Siang' ? 'selected' : '' ?>>Siang</option>
-                        <option value="Sore" <?= $shift === 'Sore' ? 'selected' : '' ?>>Sore</option>
-                        <option value="Malam" <?= $shift === 'Malam' ? 'selected' : '' ?>>Malam</option>
+                        <option value="Pagi" <?= $shift === 'Pagi' ? 'selected' : '' ?>>Pagi (07:00 - 10:00)</option>
+                        <option value="Siang" <?= $shift === 'Siang' ? 'selected' : '' ?>>Siang (10:00 - 15:00)</option>
+                        <option value="Malam" <?= $shift === 'Malam' ? 'selected' : '' ?>>Malam (16:00 - 21:30)</option>
+                        <?php if ($shift === 'Sore'): ?>
+                            <option value="Sore" selected>Sore (Legacy)</option>
+                        <?php endif; ?>
                     </select>
                 </div>
 
@@ -261,14 +260,29 @@ require_once __DIR__ . '/includes/header.php';
                 <span class="fw-bold">Data Rekapan Laporan (<?= count($reports) ?> Data Ditemukan)</span>
             </div>
             
+            <?php
+                // Link Ekspor Cepat Langsung (Tanpa harus buka modal jika ingin download data saat ini)
+                $current_params = $_GET;
+                $params_pdf = $current_params;
+                $params_pdf['format'] = 'pdf';
+                $link_quick_pdf = 'export-laporan.php?' . http_build_query($params_pdf);
+
+                $params_excel = $current_params;
+                $params_excel['format'] = 'excel';
+                $link_quick_excel = 'export-laporan.php?' . http_build_query($params_excel);
+            ?>
             <div class="d-flex align-items-center gap-2">
-                <button type="button" class="btn btn-sm btn-outline-danger d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#exportModal">
+                <a href="<?= e($link_quick_pdf) ?>" target="_blank" class="btn btn-sm btn-outline-danger d-flex align-items-center gap-1 shadow-sm" title="Langsung Cetak / Unduh PDF dari data yang tampil">
                     <i class="fa-solid fa-file-pdf"></i>
-                    <span>PDF</span>
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-success d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#exportModal">
+                    <span>Cetak PDF</span>
+                </a>
+                <a href="<?= e($link_quick_excel) ?>" class="btn btn-sm btn-outline-success d-flex align-items-center gap-1 shadow-sm" title="Langsung Unduh Excel (.XLS) dari data yang tampil">
                     <i class="fa-solid fa-file-excel"></i>
-                    <span>Excel</span>
+                    <span>Unduh Excel</span>
+                </a>
+                <button type="button" class="btn btn-sm btn-primary d-flex align-items-center gap-1 shadow-sm" data-bs-toggle="modal" data-bs-target="#exportModal" title="Buka Pengaturan Ekspor Rentang Kustom">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span>Kustom Range</span>
                 </button>
             </div>
         </div>
@@ -502,7 +516,7 @@ require_once __DIR__ . '/includes/header.php';
                                 </div>
                                 <div class="input-group input-group-sm">
                                     <span class="input-group-text"><i class="fa-regular fa-clock"></i></span>
-                                    <input type="time" class="form-control" name="jam_akhir" value="21:00" placeholder="21:00">
+                                    <input type="time" class="form-control" name="jam_akhir" value="21:30" placeholder="21:30">
                                 </div>
                             </div>
 
@@ -515,10 +529,9 @@ require_once __DIR__ . '/includes/header.php';
                             <label class="form-label small fw-semibold text-muted">Filter Berdasarkan Shift</label>
                             <select class="form-select" name="shift">
                                 <option value="">Semua Shift</option>
-                                <option value="Pagi">Shift Pagi (07:30 - 12:00)</option>
-                                <option value="Siang">Shift Siang (12:00 - 16:30)</option>
-                                <option value="Sore">Shift Sore (16:30 - 21:00)</option>
-                                <option value="Malam">Shift Malam</option>
+                                <option value="Pagi">Shift Pagi (07:00 - 10:00)</option>
+                                <option value="Siang">Shift Siang (10:00 - 15:00)</option>
+                                <option value="Malam">Shift Malam (16:00 - 21:30)</option>
                             </select>
                         </div>
                         <div class="col-12 col-md-6">
