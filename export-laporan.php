@@ -190,17 +190,17 @@ if ($format === 'excel') {
                         <tr>
                             <td class="center"><?= $no++ ?></td>
                             <td class="center"><?= date('d/m/Y', strtotime($row['tanggal'])) ?></td>
-                            <td class="center"><?= e($row['shift']) ?></td>
-                            <td><?= e($row['petugas_nama']) ?></td>
+                            <td class="center"><?= e(sanitize_csv_cell($row['shift'])) ?></td>
+                            <td><?= e(sanitize_csv_cell($row['petugas_nama'])) ?></td>
                             <td class="num"><?= (int)$row['kabel_roll_tersedia'] ?></td>
                             <td class="num"><?= (int)$row['kabel_roll_rusak'] ?></td>
                             <td class="num"><strong><?= $tot_kabel ?></strong></td>
-                            <td><?= e($row['kabel_roll_catatan'] ?: '-') ?></td>
+                            <td><?= e(sanitize_csv_cell($row['kabel_roll_catatan'] ?: '-')) ?></td>
                             <td class="num"><?= (int)$row['proyektor_tersedia'] ?></td>
                             <td class="num"><?= (int)$row['proyektor_rusak'] ?></td>
                             <td class="num"><strong><?= $tot_proyektor ?></strong></td>
-                            <td><?= e($row['proyektor_catatan'] ?: '-') ?></td>
-                            <td><?= e($row['catatan_umum'] ?: '-') ?></td>
+                            <td><?= e(sanitize_csv_cell($row['proyektor_catatan'] ?: '-')) ?></td>
+                            <td><?= e(sanitize_csv_cell($row['catatan_umum'] ?: '-')) ?></td>
                             <td class="center"><?= !empty($row['foto_dokumentasi']) ? 'Ada Foto' : 'Tidak Ada' ?></td>
                         </tr>
                     <?php endforeach; ?>

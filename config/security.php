@@ -41,6 +41,23 @@ function e($string) {
 }
 
 /**
+ * Anti-Formula / CSV Injection Helper (OWASP CWE-1236 Compliant)
+ * Menetralisir karakter awalan rumus spreadsheet (=, +, -, @, \t, \r)
+ * agar tidak dieksekusi sebagai perintah DDE / formula saat dibuka di Excel atau Google Sheets.
+ */
+function sanitize_csv_cell($value) {
+    if ($value === null || $value === '') {
+        return '';
+    }
+    $str = (string)$value;
+    $dangerous_prefixes = ['=', '+', '-', '@', "\t", "\r"];
+    if (in_array($str[0], $dangerous_prefixes, true)) {
+        return "'" . $str;
+    }
+    return $str;
+}
+
+/**
  * Generate CSRF Token
  */
 function generate_csrf_token() {

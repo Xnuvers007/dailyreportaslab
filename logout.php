@@ -6,6 +6,18 @@ require_once __DIR__ . '/config/logger.php';
 
 start_secure_session();
 
+// Validasi CSRF Token untuk mencegah serangan Logout CSRF (Cross-Site Request Forgery)
+$token = $_POST['csrf_token'] ?? $_GET['csrf_token'] ?? '';
+if (!validate_csrf_token($token)) {
+    if (!is_logged_in()) {
+        header("Location: login.php");
+        exit;
+    }
+    set_flash('danger', "Permintaan logout ditolak: Token CSRF tidak valid atau telah kedaluwarsa.");
+    header("Location: index.php");
+    exit;
+}
+
 // Catat log sebelum sesi dihancurkan
 $user = current_user();
 if ($user) {

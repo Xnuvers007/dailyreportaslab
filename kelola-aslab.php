@@ -29,8 +29,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['action']) && 
         if (empty($nama_lengkap) || strlen($nama_lengkap) < 3) {
             $errors[] = "Nama lengkap minimal 3 karakter.";
         }
-        if (strlen($password) < 6) {
-            $errors[] = "Password minimal 6 karakter.";
+        if (strlen($password) < 8 || !preg_match('/[A-Za-z]/', $password) || !preg_match('/[0-9]/', $password)) {
+            $errors[] = "Password minimal 8 karakter dan wajib memuat kombinasi huruf dan angka.";
         }
         if (!in_array($role, ['aslab', 'admin'])) {
             $role = 'aslab';
@@ -76,8 +76,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['action']) && 
         $target_id = (int)($_POST['user_id'] ?? 0);
         $new_pass  = (string)($_POST['new_password'] ?? '');
 
-        if ($target_id <= 0 || strlen($new_pass) < 6) {
-            set_flash('danger', "Password baru minimal 6 karakter.");
+        if ($target_id <= 0 || strlen($new_pass) < 8 || !preg_match('/[A-Za-z]/', $new_pass) || !preg_match('/[0-9]/', $new_pass)) {
+            set_flash('danger', "Password baru minimal 8 karakter dan wajib memuat kombinasi huruf dan angka.");
         } else {
             try {
                 $hash = password_hash($new_pass, PASSWORD_BCRYPT);
@@ -343,7 +343,7 @@ require_once __DIR__ . '/includes/header.php';
                                                 <label class="form-label small fw-semibold">Password Baru</label>
                                                 <div class="input-group">
                                                     <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
-                                                    <input type="password" name="new_password" class="form-control" placeholder="Masukkan minimal 6 karakter" required minlength="6">
+                                                    <input type="password" name="new_password" class="form-control" placeholder="Minimal 8 karakter (huruf & angka)" required minlength="8">
                                                 </div>
                                                 <div class="form-text small">Password baru akan langsung aktif dan dienkripsi bcrypt.</div>
                                             </div>
@@ -445,7 +445,7 @@ require_once __DIR__ . '/includes/header.php';
                             <label for="password" class="form-label small fw-semibold">Password Awal</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fa-solid fa-key"></i></span>
-                                <input type="password" class="form-control" id="password" name="password" placeholder="Minimal 6 karakter" required minlength="6">
+                                <input type="password" class="form-control" id="password" name="password" placeholder="Minimal 8 karakter (huruf & angka)" required minlength="8">
                             </div>
                         </div>
 

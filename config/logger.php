@@ -9,24 +9,37 @@ require_once __DIR__ . '/database.php';
 require_once __DIR__ . '/auth.php';
 
 /**
- * Dapatkan IP Address Klien secara aman (Mendukung Cloudflare & Reverse Proxy)
+ * Dapatkan IP Address Klien secara aman (Anti-IP Spoofing & Mendukung Reverse Proxy)
+ * Mencegah pemalsuan header X-Forwarded-For dari koneksi publik langsung.
  */
 function get_client_ip() {
-    $ip_keys = [
-        'HTTP_CF_CONNECTING_IP',
-        'HTTP_X_FORWARDED_FOR',
-        'HTTP_X_REAL_IP',
-        'REMOTE_ADDR'
-    ];
+    $remote_addr = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
 
-    foreach ($ip_keys as $key) {
-        if (!empty($_SERVER[$key])) {
-            $ips = explode(',', $_SERVER[$key]);
-            $ip = trim($ips[0]);
-            if (filter_var($ip, FILTER_VALIDATE_IP)) {
-                return $ip;
+    // Periksa apakah koneksi berasal dari proxy internal / trusted proxy (localhost atau private network)
+    $trusted_loopbacks = ['127.0.0.1', '::1'];
+    $is_from_proxy = in_array($remote_addr, $trusted_loopbacks, true)
+        || filter_var($remote_addr, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false;
+
+    if ($is_from_proxy) {
+        $proxy_headers = [
+            'HTTP_CF_CONNECTING_IP',
+            'HTTP_X_FORWARDED_FOR',
+            'HTTP_X_REAL_IP'
+        ];
+
+        foreach ($proxy_headers as $key) {
+            if (!empty($_SERVER[$key])) {
+                $ips = explode(',', $_SERVER[$key]);
+                $forwarded_ip = trim($ips[0]);
+                if (filter_var($forwarded_ip, FILTER_VALIDATE_IP)) {
+                    return $forwarded_ip;
+                }
             }
         }
+    }
+
+    if (filter_var($remote_addr, FILTER_VALIDATE_IP)) {
+        return $remote_addr;
     }
 
     return '127.0.0.1';

@@ -250,9 +250,9 @@ if ($latest) {
                             <span class="small text-muted d-block mb-2">
                                 <i class="fa-solid fa-image me-1"></i> Foto Dokumentasi:
                             </span>
-                            <a href="uploads/<?= e($latest['foto_dokumentasi']) ?>" target="_blank" class="image-preview-wrapper text-decoration-none" title="Klik untuk membuka foto ukuran penuh">
+                            <a href="lihat-foto.php?file=<?= urlencode($latest['foto_dokumentasi']) ?>" target="_blank" class="image-preview-wrapper text-decoration-none" title="Klik untuk membuka foto ukuran penuh">
                                 <div class="image-preview-container">
-                                    <img src="uploads/<?= e($latest['foto_dokumentasi']) ?>" alt="Dokumentasi Laporan">
+                                    <img src="lihat-foto.php?file=<?= urlencode($latest['foto_dokumentasi']) ?>" alt="Dokumentasi Laporan">
                                     <div class="image-preview-overlay">
                                         <span class="badge bg-dark bg-opacity-75 text-white px-3 py-2 rounded-pill small border border-secondary">
                                             <i class="fa-solid fa-up-right-and-down-left-from-center me-1 text-warning"></i> Buka Foto Penuh
@@ -353,7 +353,7 @@ if ($latest) {
                             </td>
                             <td>
                                 <?php if (!empty($row['foto_dokumentasi'])): ?>
-                                    <a href="uploads/<?= e($row['foto_dokumentasi']) ?>" target="_blank" class="btn btn-sm btn-outline-info py-0 px-2">
+                                    <a href="lihat-foto.php?file=<?= urlencode($row['foto_dokumentasi']) ?>" target="_blank" class="btn btn-sm btn-outline-info py-0 px-2" title="Buka Foto Terotentikasi">
                                         <i class="fa-solid fa-image"></i>
                                     </a>
                                 <?php else: ?>

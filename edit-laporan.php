@@ -465,7 +465,7 @@ require_once __DIR__ . '/includes/header.php';
                                 <div class="p-3 bg-body-tertiary rounded-3 border mb-3">
                                     <div class="small fw-bold mb-2 text-primary"><i class="fa-solid fa-image me-1"></i> Foto Saat Ini:</div>
                                     <div class="image-preview-container" style="height: 180px;">
-                                        <img src="uploads/<?= e($laporan['foto_dokumentasi']) ?>" alt="Foto Sekarang">
+                                        <img src="lihat-foto.php?file=<?= urlencode($laporan['foto_dokumentasi']) ?>" alt="Foto Sekarang">
                                     </div>
                                     <div class="form-check mt-3">
                                         <input class="form-check-input" type="checkbox" name="hapus_foto" value="1" id="hapus_foto">

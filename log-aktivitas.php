@@ -98,22 +98,22 @@ if ($export_format === 'excel' || $export_format === 'csv') {
         
         foreach ($logs_export as $l) {
             fputcsv($output, [
-                $l['id'],
+                (int)$l['id'],
                 date('Y-m-d H:i:s', strtotime($l['created_at'])),
-                $l['username'],
-                $l['action'],
-                $l['status'],
-                $l['description'],
-                $l['method'],
-                $l['url_path'],
-                $l['ip_address'],
-                $l['user_agent']
+                sanitize_csv_cell($l['username']),
+                sanitize_csv_cell($l['action']),
+                sanitize_csv_cell($l['status']),
+                sanitize_csv_cell($l['description']),
+                sanitize_csv_cell($l['method']),
+                sanitize_csv_cell($l['url_path']),
+                sanitize_csv_cell($l['ip_address']),
+                sanitize_csv_cell($l['user_agent'])
             ]);
         }
         fclose($output);
         exit;
     } else {
-        // EXCEL FORMAT (HTML SPREADSHEET TABLE)
+        // EXCEL FORMAT (HTML SPREADSHEET TABLE DENGAN FORMULA SANITIZATION)
         header('Content-Type: application/vnd.ms-excel; charset=utf-8');
         header('Content-Disposition: attachment; filename="' . $filename_base . '.xls"');
         header('Pragma: no-cache');
@@ -154,14 +154,14 @@ if ($export_format === 'excel' || $export_format === 'csv') {
             echo '<tr>';
             echo '<td style="text-align: center;">#' . (int)$l['id'] . '</td>';
             echo '<td style="text-align: center;">' . date('d/m/Y H:i:s', strtotime($l['created_at'])) . '</td>';
-            echo '<td><strong>' . htmlspecialchars($l['username']) . '</strong></td>';
-            echo '<td>' . htmlspecialchars($l['action']) . '</td>';
+            echo '<td><strong>' . htmlspecialchars(sanitize_csv_cell($l['username'])) . '</strong></td>';
+            echo '<td>' . htmlspecialchars(sanitize_csv_cell($l['action'])) . '</td>';
             echo '<td class="' . $badge_class . '" style="text-align: center;">' . htmlspecialchars($l['status']) . '</td>';
-            echo '<td>' . htmlspecialchars($l['description']) . '</td>';
-            echo '<td style="text-align: center;">' . htmlspecialchars($l['method']) . '</td>';
-            echo '<td>' . htmlspecialchars($l['url_path']) . '</td>';
-            echo '<td><code>' . htmlspecialchars($l['ip_address']) . '</code></td>';
-            echo '<td><small>' . htmlspecialchars($l['user_agent']) . '</small></td>';
+            echo '<td>' . htmlspecialchars(sanitize_csv_cell($l['description'])) . '</td>';
+            echo '<td style="text-align: center;">' . htmlspecialchars(sanitize_csv_cell($l['method'])) . '</td>';
+            echo '<td>' . htmlspecialchars(sanitize_csv_cell($l['url_path'])) . '</td>';
+            echo '<td><code>' . htmlspecialchars(sanitize_csv_cell($l['ip_address'])) . '</code></td>';
+            echo '<td><small>' . htmlspecialchars(sanitize_csv_cell($l['user_agent'])) . '</small></td>';
             echo '</tr>';
         }
 

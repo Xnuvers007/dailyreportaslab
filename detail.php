@@ -224,9 +224,9 @@ require_once __DIR__ . '/includes/header.php';
             </div>
             <div class="card-body text-center">
                 <?php if (!empty($laporan['foto_dokumentasi']) && file_exists(__DIR__ . '/uploads/' . $laporan['foto_dokumentasi'])): ?>
-                    <a href="uploads/<?= e($laporan['foto_dokumentasi']) ?>" target="_blank" class="image-preview-wrapper text-decoration-none" title="Klik untuk membuka foto ukuran penuh">
+                    <a href="lihat-foto.php?file=<?= urlencode($laporan['foto_dokumentasi']) ?>" target="_blank" class="image-preview-wrapper text-decoration-none" title="Klik untuk membuka foto ukuran penuh">
                         <div class="image-preview-container" style="height: 280px; max-height: 280px;">
-                            <img src="uploads/<?= e($laporan['foto_dokumentasi']) ?>" alt="Foto Dokumentasi">
+                            <img src="lihat-foto.php?file=<?= urlencode($laporan['foto_dokumentasi']) ?>" alt="Foto Dokumentasi">
                             <div class="image-preview-overlay">
                                 <span class="badge bg-dark bg-opacity-75 text-white px-3 py-2 rounded-pill small border border-secondary">
                                     <i class="fa-solid fa-up-right-and-down-left-from-center me-1 text-warning"></i> Buka Ukuran Penuh

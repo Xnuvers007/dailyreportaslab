@@ -167,9 +167,12 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET' && isset($page_action_map[$c
                                 <?php endif; ?>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <a class="dropdown-item text-danger" href="logout.php">
-                                        <i class="fa-solid fa-arrow-right-from-bracket me-1"></i> Logout
-                                    </a>
+                                    <form action="logout.php" method="POST" class="m-0 p-0">
+                                        <?= csrf_input() ?>
+                                        <button type="submit" class="dropdown-item text-danger border-0 bg-transparent w-100 text-start py-2">
+                                            <i class="fa-solid fa-arrow-right-from-bracket me-1"></i> Logout
+                                        </button>
+                                    </form>
                                 </li>
                             </ul>
                         </div>
