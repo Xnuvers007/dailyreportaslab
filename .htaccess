@@ -1,0 +1,20 @@
+# Disable directory indexing
+Options -Indexes
+
+# Default charset
+AddDefaultCharset UTF-8
+
+# Protect sensitive files
+<FilesMatch "(?i)\.(sql|env|ini|log|sh|bak|swp|md|git.*)$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+# Security Headers
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+

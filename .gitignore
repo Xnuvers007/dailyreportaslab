@@ -1,0 +1,6 @@
+config/database.sqlite
+uploads/doc_*
+*.log
+.DS_Store
+Thumbs.db
+
