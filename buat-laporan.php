@@ -139,8 +139,8 @@ require_once __DIR__ . '/includes/header.php';
         <!-- Header Page Title -->
         <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
             <div>
-                <div class="hologram-tag mb-2">
-                    <i class="fa-solid fa-file-pen text-warning"></i>
+                <div class="hologram-tag mb-2 d-inline-flex align-items-center gap-2">
+                    <img src="assets/img/logo-unpam.png" alt="UNPAM" style="height: 18px; width: auto; object-fit: contain;">
                     <span>Formulir Serah Terima Shift &bull; Lab TI UNPAM</span>
                 </div>
                 <h2 class="h3 fw-bold mb-1">

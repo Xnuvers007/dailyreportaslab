@@ -242,6 +242,11 @@ if ($format === 'excel') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rekap Laporan Harian Aslab UNPAM (<?= date('d-m-Y') ?>)</title>
     
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/logo-unpam.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/img/logo-unpam.png">
+    <link rel="shortcut icon" href="assets/img/logo-unpam.png">
+    
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome 6 -->
@@ -502,7 +507,7 @@ if ($format === 'excel') {
         <!-- Kop Surat Resmi UNPAM -->
         <div class="kop-surat">
             <div class="kop-logo">
-                <i class="fa-solid fa-graduation-cap"></i>
+                <img src="assets/img/logo-unpam.png" alt="Logo UNPAM" style="width: 100%; height: 100%; object-fit: contain;">
             </div>
             <div class="kop-text">
                 <h1 class="kop-instansi">UNIVERSITAS PAMULANG</h1>
@@ -512,8 +517,8 @@ if ($format === 'excel') {
                     Jl. Surya Kencana No. 1, Pamulang Barat, Kec. Pamulang, Kota Tangerang Selatan, Banten 15417 &bull; Telp: (021) 7412566
                 </p>
             </div>
-            <div class="kop-logo text-primary">
-                <i class="fa-solid fa-layer-group"></i>
+            <div class="kop-logo">
+                <img src="assets/img/logo-unpam.png" alt="Logo UNPAM" style="width: 100%; height: 100%; object-fit: contain; opacity: 0.95;">
             </div>
         </div>
 

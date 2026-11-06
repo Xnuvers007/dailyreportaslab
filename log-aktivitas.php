@@ -201,8 +201,8 @@ require_once __DIR__ . '/includes/header.php';
     <!-- Header Page Title & Action Buttons -->
     <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3 mb-4">
         <div>
-            <div class="hologram-tag mb-2">
-                <i class="fa-solid fa-shield-halved text-primary"></i>
+            <div class="hologram-tag mb-2 d-inline-flex align-items-center gap-2">
+                <img src="assets/img/logo-unpam.png" alt="UNPAM" style="height: 18px; width: auto; object-fit: contain;">
                 <span>Sistem Keamanan & Audit Trail &bull; Universitas Pamulang</span>
             </div>
             <h2 class="h3 fw-bold mb-1">

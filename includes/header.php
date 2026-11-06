@@ -27,8 +27,43 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET' && isset($page_action_map[$c
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= isset($page_title) ? e($page_title) . ' - ' : '' ?>Laporan Harian Aslab</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    
+    <!-- Primary Meta Tags -->
+    <title><?= isset($page_title) ? e($page_title) . ' - ' : '' ?>Laporan Harian Aslab UNPAM</title>
+    <meta name="title" content="<?= isset($page_title) ? e($page_title) . ' - ' : '' ?>Laporan Harian Aslab UNPAM">
+    <meta name="description" content="Sistem Informasi Pelaporan Harian dan Monitoring Inventaris Asisten Laboratorium Komputer Universitas Pamulang (UNPAM). Rekapitulasi proyektor, kabel roll, dan catatan operasional shift.">
+    <meta name="keywords" content="aslab unpam, laporan harian aslab, universitas pamulang, unpam, lab komputer unpam, teknik informatika unpam, asisten laboratorium, inventaris lab">
+    <meta name="author" content="Laboratorium Komputer Universitas Pamulang">
+    <meta name="robots" content="noindex, nofollow">
+    
+    <!-- Open Graph / Facebook / WhatsApp Share Preview -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<?= e((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . ($_SERVER['REQUEST_URI'] ?? '/')) ?>">
+    <meta property="og:title" content="<?= isset($page_title) ? e($page_title) . ' - ' : '' ?>AslabReport UNPAM">
+    <meta property="og:description" content="Sistem Monitoring Inventaris & Rekap Harian Asisten Lab Komputer Universitas Pamulang.">
+    <meta property="og:image" content="assets/img/logo-unpam.png">
+    <meta property="og:site_name" content="AslabReport Universitas Pamulang">
+    <meta property="og:locale" content="id_ID">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="<?= isset($page_title) ? e($page_title) . ' - ' : '' ?>AslabReport UNPAM">
+    <meta name="twitter:description" content="Sistem Monitoring Inventaris & Rekap Harian Asisten Lab Komputer Universitas Pamulang.">
+    <meta name="twitter:image" content="assets/img/logo-unpam.png">
+    
+    <!-- Favicon & PWA App Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/logo-unpam.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/logo-unpam.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/img/logo-unpam.png">
+    <link rel="shortcut icon" href="assets/img/logo-unpam.png">
+    <meta name="theme-color" content="#f97316">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="AslabReport UNPAM">
+    <meta name="format-detection" content="telephone=no">
     
     <!-- Script Anti-Flicker Dark/Light Theme -->
     <script>
@@ -57,9 +92,12 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET' && isset($page_action_map[$c
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg sticky-top">
         <div class="container">
-            <a class="navbar-brand d-flex items-center gap-2" href="index.php">
-                <span class="text-primary"><i class="fa-solid fa-layer-group fa-lg"></i></span>
-                <span>AslabReport</span>
+            <a class="navbar-brand d-flex align-items-center gap-2" href="index.php">
+                <img src="assets/img/logo-unpam.png" alt="Logo UNPAM" style="height: 38px; width: auto; object-fit: contain;">
+                <div class="d-flex flex-column" style="line-height: 1.15;">
+                    <span class="fw-bold tracking-tight text-primary" style="font-size: 1.15rem;">AslabReport</span>
+                    <span class="text-muted" style="font-size: 0.62rem; letter-spacing: 0.04em; font-weight: 700;">UNIVERSITAS PAMULANG</span>
+                </div>
             </a>
             
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">

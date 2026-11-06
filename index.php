@@ -60,8 +60,8 @@ if ($latest) {
 <div class="hero-welcome-card p-4 p-md-5 mb-4 animate-fade-up border-gradient-top">
     <div class="row align-items-center g-4">
         <div class="col-12 col-md-7 col-lg-8">
-            <div class="hologram-tag mb-3">
-                <i class="fa-solid fa-atom"></i>
+            <div class="hologram-tag mb-3 d-inline-flex align-items-center gap-2">
+                <img src="assets/img/logo-unpam.png" alt="UNPAM" style="height: 18px; width: auto; object-fit: contain;">
                 <span>Asisten Laboratorium &bull; Universitas Pamulang</span>
             </div>
             <h1 class="h3 fw-bold mb-2">

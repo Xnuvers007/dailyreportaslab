@@ -81,8 +81,32 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Laporan Harian Aslab</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    
+    <!-- Primary Meta Tags -->
+    <title>Login Aslab - Laporan Harian UNPAM</title>
+    <meta name="title" content="Login Aslab - Laporan Harian UNPAM">
+    <meta name="description" content="Portal Otentikasi Asisten Laboratorium Komputer Universitas Pamulang (UNPAM). Masuk untuk input rekapitulasi inventaris dan catatan operasional shift.">
+    <meta name="keywords" content="aslab unpam, login aslab, universitas pamulang, unpam, lab komputer unpam, asisten laboratorium">
+    <meta name="author" content="Laboratorium Komputer Universitas Pamulang">
+    <meta name="robots" content="noindex, nofollow">
+    
+    <!-- Open Graph & Twitter -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Login Aslab - Laporan Harian UNPAM">
+    <meta property="og:description" content="Portal Otentikasi Asisten Laboratorium Komputer Universitas Pamulang.">
+    <meta property="og:image" content="assets/img/logo-unpam.png">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:image" content="assets/img/logo-unpam.png">
+    
+    <!-- Favicon & PWA Theme -->
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/logo-unpam.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/img/logo-unpam.png">
+    <link rel="shortcut icon" href="assets/img/logo-unpam.png">
+    <meta name="theme-color" content="#f97316">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     
     <!-- Script Anti-Flicker Dark/Light Theme -->
     <script>
@@ -119,11 +143,12 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     <div class="container position-relative animate-fade-up" style="max-width: 440px; z-index: 10;">
         
         <div class="text-center mb-4">
-            <div class="stat-icon-box bg-primary text-white mx-auto mb-3 shadow floating-icon" style="width: 60px; height: 60px; font-size: 1.6rem; border-radius: 1rem;">
-                <i class="fa-solid fa-layer-group"></i>
+            <div class="mb-3">
+                <img src="assets/img/logo-unpam.png" alt="Logo Universitas Pamulang" class="img-fluid floating-icon" style="height: 78px; width: auto; object-fit: contain; filter: drop-shadow(0 4px 14px rgba(249, 115, 22, 0.35));">
             </div>
             <h4 class="fw-bold mb-1 text-main">AslabReport</h4>
-            <p class="text-muted small mb-0">Sistem Informasi Inventaris & Laporan Harian</p>
+            <p class="text-muted small mb-0 fw-semibold" style="letter-spacing: 0.03em;">UNIVERSITAS PAMULANG</p>
+            <p class="text-muted small mb-0" style="font-size: 0.78rem;">Sistem Informasi Inventaris & Laporan Harian Lab</p>
         </div>
 
         <div class="glass-card shadow-lg">
