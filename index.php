@@ -250,9 +250,14 @@ if ($latest) {
                             <span class="small text-muted d-block mb-2">
                                 <i class="fa-solid fa-image me-1"></i> Foto Dokumentasi:
                             </span>
-                            <a href="uploads/<?= e($latest['foto_dokumentasi']) ?>" target="_blank" class="d-block text-decoration-none">
-                                <div class="image-preview-container" style="max-height: 180px;">
-                                    <img src="uploads/<?= e($latest['foto_dokumentasi']) ?>" alt="Dokumentasi Laporan" class="img-fluid rounded">
+                            <a href="uploads/<?= e($latest['foto_dokumentasi']) ?>" target="_blank" class="image-preview-wrapper text-decoration-none" title="Klik untuk membuka foto ukuran penuh">
+                                <div class="image-preview-container">
+                                    <img src="uploads/<?= e($latest['foto_dokumentasi']) ?>" alt="Dokumentasi Laporan">
+                                    <div class="image-preview-overlay">
+                                        <span class="badge bg-dark bg-opacity-75 text-white px-3 py-2 rounded-pill small border border-secondary">
+                                            <i class="fa-solid fa-up-right-and-down-left-from-center me-1 text-warning"></i> Buka Foto Penuh
+                                        </span>
+                                    </div>
                                 </div>
                             </a>
                         </div>

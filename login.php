@@ -182,6 +182,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     <!-- Modular App Scripts -->
     <script src="assets/js/theme.js"></script>
     <script src="assets/js/animations.js"></script>
+    <script src="assets/js/background3d.js"></script>
     <script src="assets/js/app.js"></script>
 </body>
 </html>
