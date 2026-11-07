@@ -22,9 +22,13 @@ server {
     add_header X-XSS-Protection "1; mode=block" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
 
-    # 1. BLOKIR AKSES LANGSUNG KE FOLDER UPLOADS (PRIVASI FOTO)
+    # 1. BLOKIR AKSES LANGSUNG KE FOLDER UPLOADS & STORAGE (PRIVASI FOTO)
     # Foto hanya boleh diakses melalui gatekeeper autentikasi: lihat-foto.php
     location ^~ /uploads/ {
+        deny all;
+        return 403;
+    }
+    location ^~ /storage/ {
         deny all;
         return 403;
     }

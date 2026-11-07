@@ -4,10 +4,19 @@ Options -Indexes
 # Default charset
 AddDefaultCharset UTF-8
 
+# Block direct HTTP access to private directories (uploads, storage, config, includes)
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^(uploads|storage|config|includes)(/.*)?$ - [F,L,NC]
+</IfModule>
+
 # Protect sensitive files & databases
 <FilesMatch "(?i)\.(sql|sqlite|db|env|ini|log|sh|bak|swp|md|json|lock|git.*)$">
     Order Deny,Allow
     Deny from all
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
 </FilesMatch>
 
 # Security Headers

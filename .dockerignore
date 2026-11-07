@@ -8,4 +8,8 @@ database.sqlite
 docker-compose.override.yml
 tests/
 tmp/
-
+storage/
+uploads/*.jpg
+uploads/*.jpeg
+uploads/*.png
+uploads/*.webp

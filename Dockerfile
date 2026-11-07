@@ -25,8 +25,12 @@ RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf \
 
 # Buat direktori penyimpanan foto privat DI LUAR DOCUMENT ROOT (/var/www/storage/uploads)
 # Ini memastikan file foto secara fisik tidak dapat diakses langsung oleh publik/web server
-RUN mkdir -p /var/www/storage/uploads /var/www/html \
-    && chown -R www-data:www-data /var/www/storage \
+RUN mkdir -p /var/www/storage/uploads /var/www/html
+
+# Salin sampel foto ke direktori privat
+COPY storage/uploads/ /var/www/storage/uploads/
+
+RUN chown -R www-data:www-data /var/www/storage \
     && chmod -R 775 /var/www/storage
 
 # Set working directory ke document root
