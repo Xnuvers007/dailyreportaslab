@@ -189,13 +189,18 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     <!-- Login Container -->
     <div class="container position-relative animate-fade-up" style="max-width: 440px; z-index: 10;">
         
-        <div class="text-center mb-4">
-            <div class="mb-3">
-                <img src="assets/img/logo-unpam.png" alt="Logo Universitas Pamulang" class="img-fluid floating-icon" style="height: 78px; width: auto; object-fit: contain; filter: drop-shadow(0 4px 14px rgba(249, 115, 22, 0.35));">
+        <div class="text-center mb-2">
+            <div class="mb-2">
+                <img src="assets/img/logo-unpam.png" alt="Logo Universitas Pamulang" class="img-fluid floating-icon" style="height: 64px; width: auto; object-fit: contain; filter: drop-shadow(0 4px 14px rgba(249, 115, 22, 0.35));">
             </div>
             <h4 class="fw-bold mb-1 text-main">AslabReport</h4>
             <p class="text-muted small mb-0 fw-semibold" style="letter-spacing: 0.03em;">UNIVERSITAS PAMULANG</p>
             <p class="text-muted small mb-0" style="font-size: 0.78rem;">Sistem Informasi Inventaris & Laporan Harian Lab</p>
+        </div>
+
+        <!-- 3D Interactive Mascot (Three.js Companion) -->
+        <div class="login-avatar-container text-center position-relative" style="height: 185px; margin-bottom: -18px; z-index: 12;">
+            <canvas id="login-avatar-canvas" style="width: 100%; height: 100%; display: block; outline: none;"></canvas>
         </div>
 
         <div class="glass-card shadow-lg">
@@ -223,7 +228,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                         <label for="username" class="form-label small fw-semibold">Username Aslab</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
-                            <input type="text" class="form-control" id="username" name="username" placeholder="Masukkan username" required autofocus>
+                            <input type="text" class="form-control" id="username" name="username" placeholder="Masukkan username" required autofocus autocomplete="username">
                         </div>
                     </div>
 
@@ -231,7 +236,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                         <label for="password" class="form-label small fw-semibold">Password</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
-                            <input type="password" class="form-control" id="password" name="password" placeholder="Masukkan password" required>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Masukkan password" required autocomplete="current-password">
+                            <button class="btn btn-outline-secondary" type="button" id="togglePasswordBtn" title="Lihat / Sembunyikan Password">
+                                <i class="fa-solid fa-eye" id="togglePasswordIcon"></i>
+                            </button>
                         </div>
                     </div>
 
@@ -269,6 +277,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     <script src="assets/js/theme.js"></script>
     <script src="assets/js/animations.js"></script>
     <script src="assets/js/background3d.js"></script>
+    <script src="assets/js/login-avatar3d.js"></script>
     <script src="assets/js/app.js"></script>
 </body>
 </html>
