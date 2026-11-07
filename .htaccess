@@ -11,8 +11,8 @@ AddDefaultCharset UTF-8
     RewriteRule ^(Dockerfile|docker-compose\.yml|router\.php|\.dockerignore|\.gitignore|\.env.*)$ - [F,L,NC]
 </IfModule>
 
-# Protect sensitive files & databases
-<FilesMatch "(?i)^(Dockerfile|docker-compose\.yml|router\.php|\.dockerignore|\.gitignore|\.env.*)$|\.(sql|sqlite|db|env|ini|log|sh|bak|swp|md|json|lock|git.*|yml|yaml|example|config)$">
+# Protect sensitive files & databases (excl. manifest.json for PWA)
+<FilesMatch "(?i)^(Dockerfile|docker-compose\.yml|router\.php|\.dockerignore|\.gitignore|\.env.*|composer\.json|package\.json|package-lock\.json)$|\.(sql|sqlite|db|env|ini|log|sh|bak|swp|md|lock|git.*|yml|yaml|example|config)$">
     Order Deny,Allow
     Deny from all
     <IfModule mod_authz_core.c>
@@ -20,14 +20,14 @@ AddDefaultCharset UTF-8
     </IfModule>
 </FilesMatch>
 
-# Allow manifest.json for Progressive Web App (PWA)
-<Files "manifest.json">
+# Explicitly ensure PWA assets are always allowed
+<FilesMatch "^(manifest\.json|sw\.js|offline\.html)$">
     Order Allow,Deny
     Allow from all
     <IfModule mod_authz_core.c>
         Require all granted
     </IfModule>
-</Files>
+</FilesMatch>
 
 # Security Headers
 <IfModule mod_headers.c>
