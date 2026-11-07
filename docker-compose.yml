@@ -83,3 +83,4 @@ networks:
   aslab_network:
     name: dailyreportaslab_network
     driver: bridge
+

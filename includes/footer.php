@@ -25,10 +25,10 @@
         </div>
     </footer>
 
-    <!-- Bootstrap 5 JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <!-- Three.js 3D Engine Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Bootstrap 5 JS Bundle (Local Vendor) -->
+    <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- Three.js 3D Engine Library (Local Vendor) -->
+    <script src="assets/vendor/three/three.min.js"></script>
     
     <!-- Modular Custom Scripts -->
     <script src="assets/js/theme.js"></script>

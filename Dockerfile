@@ -52,3 +52,4 @@ EXPOSE 80
 
 # Jalankan Apache di foreground
 CMD ["apache2-foreground"]
+

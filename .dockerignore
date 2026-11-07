@@ -8,3 +8,4 @@ database.sqlite
 docker-compose.override.yml
 tests/
 tmp/
+

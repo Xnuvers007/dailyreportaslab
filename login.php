@@ -164,10 +164,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         })();
     </script>
 
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- FontAwesome 6 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Bootstrap 5 CSS (Local Vendor) -->
+    <link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
+    <!-- FontAwesome 6 (Local Vendor) -->
+    <link rel="stylesheet" href="assets/vendor/fontawesome/css/all.min.css">
     <!-- Modular Custom CSS -->
     <link rel="stylesheet" href="assets/css/theme.css">
     <link rel="stylesheet" href="assets/css/animations.css">
@@ -261,10 +261,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 
     </div>
 
-    <!-- Bootstrap 5 Bundle JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Three.js Library via CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Bootstrap 5 Bundle JS (Local Vendor) -->
+    <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- Three.js Library (Local Vendor) -->
+    <script src="assets/vendor/three/three.min.js"></script>
     <!-- Modular App Scripts -->
     <script src="assets/js/theme.js"></script>
     <script src="assets/js/animations.js"></script>
