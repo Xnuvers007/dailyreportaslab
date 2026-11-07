@@ -103,14 +103,48 @@ function validate_csrf_token($token) {
  * Mendukung penyimpanan di luar web root via env UPLOADS_DIR atau folder storage/
  */
 function get_uploads_directory() {
-    if (getenv('UPLOADS_DIR') && is_dir(getenv('UPLOADS_DIR'))) {
-        return realpath(getenv('UPLOADS_DIR'));
+    // 1. Cek environment variable (misal UPLOADS_DIR di Docker / production server)
+    if (getenv('UPLOADS_DIR')) {
+        $env_path = rtrim(getenv('UPLOADS_DIR'), '/\\');
+        if (!is_dir($env_path)) {
+            @mkdir($env_path, 0755, true);
+        }
+        return realpath($env_path) ?: $env_path;
     }
-    $private_storage = __DIR__ . '/../../storage/uploads';
-    if (is_dir($private_storage)) {
-        return realpath($private_storage);
+
+    // 2. Cek direktori storage di luar web root (standar isolasi web production)
+    $outside_storage = __DIR__ . '/../../storage/uploads';
+    if (is_dir($outside_storage)) {
+        return realpath($outside_storage);
     }
+
+    // 3. Gunakan direktori storage privat internal project
+    $internal_storage = __DIR__ . '/../storage/uploads';
+    if (!is_dir($internal_storage)) {
+        @mkdir($internal_storage, 0755, true);
+    }
+    if (is_dir($internal_storage)) {
+        return realpath($internal_storage) ?: $internal_storage;
+    }
+
+    // 4. Fallback ke folder uploads
     return realpath(__DIR__ . '/../uploads') ?: (__DIR__ . '/../uploads');
+}
+
+/**
+ * Cek apakah file foto dokumentasi ada di storage privat atau legacy uploads
+ */
+function photo_file_exists($filename) {
+    if (empty($filename)) return false;
+    $safe_name = basename($filename);
+    $storage_dir = get_uploads_directory();
+    if (is_file($storage_dir . DIRECTORY_SEPARATOR . $safe_name)) {
+        return true;
+    }
+    if (is_file(__DIR__ . '/../uploads/' . $safe_name)) {
+        return true;
+    }
+    return false;
 }
 
 /**

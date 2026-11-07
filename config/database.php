@@ -21,29 +21,42 @@ $db_pass = '';
  */
 
 if (getenv('DB_HOST')) $db_host = getenv('DB_HOST');
+if (getenv('DB_PORT')) $db_port = getenv('DB_PORT');
 if (getenv('DB_NAME')) $db_name = getenv('DB_NAME');
 if (getenv('DB_USER')) $db_user = getenv('DB_USER');
-if (getenv('DB_PASS')) $db_pass = getenv('DB_PASS');
+if (getenv('DB_PASS') !== false) $db_pass = getenv('DB_PASS');
 
-$is_infinityfree_or_remote = ($db_host !== '127.0.0.1' && $db_host !== 'localhost');
+$is_remote_or_docker = ($db_host !== '127.0.0.1' && $db_host !== 'localhost');
+$pdo = null;
 
-try {
-    $dsn = "mysql:host={$db_host};port={$db_port};dbname={$db_name};charset=utf8mb4";
-    $options = [
-        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_EMULATE_PREPARES   => false, // Mencegah SQL Injection di level driver
-        PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci"
-    ];
+// Koneksi MySQL dengan mekanisme retry otomatis (Sangat berguna saat container database Docker baru booting)
+$max_retries = $is_remote_or_docker ? 5 : 1;
+for ($attempt = 1; $attempt <= $max_retries; $attempt++) {
+    try {
+        $dsn = "mysql:host={$db_host};port={$db_port};dbname={$db_name};charset=utf8mb4";
+        $options = [
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES   => false, // Mencegah SQL Injection di level driver
+            PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci"
+        ];
 
-    $pdo = new PDO($dsn, $db_user, $db_pass, $options);
-} catch (PDOException $e) {
-    // Jika di hosting remote / InfinityFree, laporkan error konfigurasi
-    if ($is_infinityfree_or_remote) {
-        error_log("Database connection error: " . $e->getMessage());
-        die("Koneksi database MySQL gagal. Silakan periksa kembali konfigurasi database di file config/database.php.");
+        $pdo = new PDO($dsn, $db_user, $db_pass, $options);
+        break; // Berhasil terhubung
+    } catch (PDOException $e) {
+        if ($attempt < $max_retries) {
+            sleep(1);
+            continue;
+        }
+        // Jika koneksi remote/docker tetap gagal setelah batas percobaan
+        if ($is_remote_or_docker) {
+            error_log("Database connection error: " . $e->getMessage());
+            die("Koneksi database MySQL gagal. Pastikan database telah berjalan dan kredensial di config/database.php atau environment Docker sudah sesuai.");
+        }
     }
+}
 
+if (!$pdo) {
     // Jika di Localhost dan MySQL belum dinyalakan, fallback otomatis ke SQLite lokal
     try {
         $sqlite_file = __DIR__ . '/database.sqlite';

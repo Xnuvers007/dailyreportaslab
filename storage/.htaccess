@@ -1,0 +1,19 @@
+# ==============================================================================
+# SECURE STORAGE GATEWAY - REQUIRE ALL DENIED
+# ==============================================================================
+# Folder penyimpanan privat: Tidak boleh diakses langsung oleh browser publik.
+# Hanya dapat dibaca secara aman melalui gatekeeper: lihat-foto.php
+# ==============================================================================
+Order Deny,Allow
+Deny from all
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+
+# Disable script execution
+<FilesMatch "(?i)\.(php|phtml|php3|php4|php5|php7|php8|phps|pht|phar|inc|cgi|pl|py|sh|bash|exe|asp|aspx|jsp)$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+Options -Indexes -ExecCGI

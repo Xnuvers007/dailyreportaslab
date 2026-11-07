@@ -382,7 +382,7 @@ require_once __DIR__ . '/includes/header.php';
                                     <?php endif; ?>
                                 </td>
                                 <td class="text-center">
-                                    <?php if (!empty($row['foto_dokumentasi']) && file_exists(__DIR__ . '/uploads/' . $row['foto_dokumentasi'])): ?>
+                                    <?php if (!empty($row['foto_dokumentasi']) && photo_file_exists($row['foto_dokumentasi'])): ?>
                                         <a href="lihat-foto.php?file=<?= urlencode($row['foto_dokumentasi']) ?>" target="_blank" class="btn btn-sm btn-outline-info py-0 px-2" title="Lihat Foto Dokumentasi">
                                             <i class="fa-solid fa-image"></i>
                                         </a>

@@ -27,7 +27,18 @@ $uploads_dir   = get_uploads_directory();
 $target_path   = $uploads_dir . DIRECTORY_SEPARATOR . $safe_filename;
 $real_target   = realpath($target_path);
 
-// Validasi keberadaan file dan pastikan berada strictly di dalam direktori penyimpanan foto
+// Fallback jika file masih di direktori uploads lama
+if (!$real_target || !is_file($real_target)) {
+    $legacy_dir  = realpath(__DIR__ . '/uploads');
+    $legacy_path = $legacy_dir ? ($legacy_dir . DIRECTORY_SEPARATOR . $safe_filename) : null;
+    $real_legacy = $legacy_path ? realpath($legacy_path) : false;
+    if ($real_legacy && $legacy_dir && strpos($real_legacy, $legacy_dir) === 0 && is_file($real_legacy)) {
+        $real_target = $real_legacy;
+        $uploads_dir = $legacy_dir;
+    }
+}
+
+// Validasi keberadaan file dan pastikan berada strictly di dalam direktori penyimpanan yang sah
 if (!$real_target || !$uploads_dir || strpos($real_target, $uploads_dir) !== 0 || !is_file($real_target)) {
     http_response_code(404);
     die("Foto dokumentasi tidak ditemukan.");

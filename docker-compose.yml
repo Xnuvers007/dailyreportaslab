@@ -1,0 +1,85 @@
+# ==============================================================================
+# DOCKER COMPOSE - SISTEM LAPORAN HARIAN ASISTEN LABORATORIUM UNPAM
+# Multi-container: Web App (PHP 8.2), Database (MariaDB 10.11), & phpMyAdmin
+# ==============================================================================
+
+version: '3.8'
+
+services:
+  # 1. Web Application Container
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dailyreportaslab_app
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_NAME=laporan_aslab
+      - DB_USER=aslab_user
+      - DB_PASS=aslab_secret123
+      - UPLOADS_DIR=/var/www/storage/uploads
+    volumes:
+      # Volume untuk foto privat di luar web root (persisten & aman dari akses publik)
+      - storage_uploads:/var/www/storage/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - aslab_network
+
+  # 2. Database MariaDB Container
+  db:
+    image: mariadb:10.11
+    container_name: dailyreportaslab_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root_secret123
+      MYSQL_DATABASE: laporan_aslab
+      MYSQL_USER: aslab_user
+      MYSQL_PASSWORD: aslab_secret123
+    volumes:
+      # Inisialisasi otomatis skema tabel dan user default saat container pertama kali dibuat
+      - ./database.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - db_data:/var/lib/mysql
+    networks:
+      - aslab_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_secret123"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  # 3. phpMyAdmin Database GUI (Opsional / Admin Management)
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: dailyreportaslab_pma
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: root_secret123
+      UPLOAD_LIMIT: 20M
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - aslab_network
+
+volumes:
+  db_data:
+    name: dailyreportaslab_db_data
+  storage_uploads:
+    name: dailyreportaslab_storage_uploads
+
+networks:
+  aslab_network:
+    name: dailyreportaslab_network
+    driver: bridge

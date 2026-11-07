@@ -471,7 +471,7 @@ require_once __DIR__ . '/includes/header.php';
                         <div class="col-12">
                             <label class="form-label small fw-semibold text-muted">Foto Dokumentasi</label>
                             
-                            <?php if (!empty($laporan['foto_dokumentasi']) && file_exists(__DIR__ . '/uploads/' . $laporan['foto_dokumentasi'])): ?>
+                            <?php if (!empty($laporan['foto_dokumentasi']) && photo_file_exists($laporan['foto_dokumentasi'])): ?>
                                 <div class="p-3 bg-body-tertiary rounded-3 border mb-3">
                                     <div class="small fw-bold mb-2 text-primary"><i class="fa-solid fa-image me-1"></i> Foto Saat Ini:</div>
                                     <div class="image-preview-container" style="height: 180px;">
