@@ -20,6 +20,15 @@ AddDefaultCharset UTF-8
     </IfModule>
 </FilesMatch>
 
+# Allow manifest.json for Progressive Web App (PWA)
+<Files "manifest.json">
+    Order Allow,Deny
+    Allow from all
+    <IfModule mod_authz_core.c>
+        Require all granted
+    </IfModule>
+</Files>
+
 # Security Headers
 <IfModule mod_headers.c>
     Header set X-Content-Type-Options "nosniff"

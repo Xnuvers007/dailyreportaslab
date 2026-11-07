@@ -65,7 +65,14 @@ server {
         fastcgi_buffers 4 16k;
     }
 
-    # 6. Cache Asset Statis (CSS, JS, Gambar UI)
+    # 6. PWA Service Worker (Never Cache Aggressively)
+    location = /sw.js {
+        add_header Cache-Control "no-cache, no-store, must-revalidate";
+        add_header Service-Worker-Allowed "/";
+        expires off;
+    }
+
+    # 7. Cache Asset Statis (CSS, JS, Gambar UI)
     location ~* \.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
         expires 7d;
         add_header Cache-Control "public, no-transform";

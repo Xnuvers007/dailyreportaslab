@@ -283,3 +283,186 @@
     vertical-align: middle;
 }
 
+/* ========================================================
+   PROGRESSIVE WEB APP (PWA) STYLING
+   ======================================================== */
+.pwa-install-banner {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 32px);
+    max-width: 520px;
+    z-index: 1080;
+    animation: pwaSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes pwaSlideUp {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 40px);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+@keyframes pwaSlideDown {
+    from {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+    to {
+        opacity: 0;
+        transform: translate(-50%, 40px);
+    }
+}
+
+.pwa-banner-card {
+    background: rgba(15, 23, 42, 0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(249, 115, 22, 0.35);
+    border-radius: 1.15rem;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), 0 0 20px rgba(249, 115, 22, 0.2);
+    padding: 0.9rem 1.15rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.pwa-banner-content {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    min-width: 0;
+}
+
+.pwa-banner-logo {
+    width: 44px;
+    height: 44px;
+    border-radius: 0.65rem;
+    object-fit: contain;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 4px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.pwa-banner-text {
+    min-width: 0;
+}
+
+.pwa-banner-title {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.25;
+}
+
+.pwa-banner-desc {
+    font-size: 0.73rem;
+    color: rgba(255, 255, 255, 0.75);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pwa-banner-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex-shrink: 0;
+}
+
+.btn-pwa-install {
+    background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+    color: #ffffff;
+    border: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.45rem 0.95rem;
+    border-radius: 0.65rem;
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.2s ease;
+    box-shadow: 0 3px 10px rgba(234, 88, 12, 0.35);
+}
+
+.btn-pwa-install:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 14px rgba(234, 88, 12, 0.5);
+    color: #ffffff;
+}
+
+.btn-pwa-dismiss {
+    background: rgba(255, 255, 255, 0.12);
+    border: none;
+    color: rgba(255, 255, 255, 0.75);
+    width: 32px;
+    height: 32px;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+}
+
+.btn-pwa-dismiss:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+}
+
+/* Network Status Toast */
+.pwa-network-toast {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1090;
+    padding: 0.5rem 1.2rem;
+    border-radius: 2rem;
+    font-size: 0.82rem;
+    display: none;
+    align-items: center;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    animation: pwaToastFadeIn 0.3s ease-out;
+}
+
+@keyframes pwaToastFadeIn {
+    from { opacity: 0; transform: translate(-50%, -12px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.pwa-network-toast.offline {
+    background: rgba(185, 28, 28, 0.95);
+    color: #ffffff;
+    border: 1px solid rgba(254, 202, 202, 0.3);
+}
+
+.pwa-network-toast.online {
+    background: rgba(21, 128, 61, 0.95);
+    color: #ffffff;
+    border: 1px solid rgba(187, 247, 208, 0.3);
+}
+
+/* Simple Toast */
+.pwa-simple-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 1090;
+    background: rgba(15, 23, 42, 0.92);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(12px);
+    border-radius: 0.75rem;
+    padding: 0.75rem 1.2rem;
+    font-size: 0.85rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    animation: pwaToastFadeIn 0.3s ease-out;
+}
+

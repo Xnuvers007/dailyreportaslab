@@ -53,16 +53,18 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET' && isset($page_action_map[$c
     <meta name="twitter:description" content="Sistem Monitoring Inventaris & Rekap Harian Asisten Lab Komputer Universitas Pamulang.">
     <meta name="twitter:image" content="assets/img/logo-unpam.png">
     
-    <!-- Favicon & PWA App Icons -->
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/logo-unpam.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/logo-unpam.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="assets/img/logo-unpam.png">
-    <link rel="shortcut icon" href="assets/img/logo-unpam.png">
-    <meta name="theme-color" content="#f97316">
+    <!-- Favicon & PWA Settings -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/icons/icon-72.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/img/icons/icon-192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/img/icons/apple-touch-icon.png">
+    <link rel="shortcut icon" href="favicon.ico">
+    <meta name="theme-color" content="#ea580c">
+    <meta name="application-name" content="AslabReport">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="AslabReport UNPAM">
+    <meta name="apple-mobile-web-app-title" content="AslabReport">
     <meta name="format-detection" content="telephone=no">
     
     <!-- Script Anti-Flicker Dark/Light Theme -->
@@ -136,6 +138,12 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET' && isset($page_action_map[$c
                 </ul>
                 
                 <div class="d-flex align-items-center gap-2">
+                    <!-- Tombol Install PWA -->
+                    <button class="btn btn-outline-warning btn-sm d-none align-items-center gap-1 rounded-pill px-3" id="nav-install-btn" type="button" title="Pasang Aplikasi ke Layar Utama">
+                        <i class="fa-solid fa-cloud-arrow-down"></i>
+                        <span class="small fw-semibold">Pasang App</span>
+                    </button>
+
                     <!-- Tombol Dark / Light Mode -->
                     <button class="theme-toggle-btn" type="button" title="Ganti Mode Gelap / Terang">
                         <i class="fa-solid fa-moon theme-icon"></i>

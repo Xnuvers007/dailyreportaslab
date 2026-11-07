@@ -30,6 +30,11 @@ Mendukung deployment menggunakan **Docker & Docker Compose**, **Server VPS (Apac
    - Ekspor rekapitulasi data ke format **PDF Cetak Resmi** dan **Spreadsheet Excel (.XLS)**.
 8. **Audit Trail & Log Aktivitas (30-Day Auto-Retention)**:
    - Mencatat seluruh riwayat login, input laporan, perubahan data, dan ekspor dengan rotasi otomatis 30 hari.
+9. **Progressive Web App (PWA) Mobile Ready**:
+   - Dapat di-install langsung ke layar utama (*Add to Home Screen*) di Android (Chrome/Edge) dan iOS (Safari).
+   - Beroperasi dalam mode *standalone* layaknya aplikasi mobile native tanpa address bar.
+   - Dilengkapi *Service Worker* dengan caching aset statis dan halaman cadangan informatif saat offline (`offline.html`).
+   - Menyediakan tombol *shortcut* cepat di ikon aplikasi: Input Laporan, Riwayat, dan Dashboard.
 
 ---
 

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="id" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Koneksi Terputus - AslabReport UNPAM</title>
+    
+    <!-- PWA Settings -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="assets/img/icons/icon-96.png">
+    <meta name="theme-color" content="#ea580c">
+
+    <!-- Bootstrap 5 CSS (Local Vendor) -->
+    <link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/vendor/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/theme.css">
+    <link rel="stylesheet" href="assets/css/components.css">
+
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at 50% 20%, rgba(234, 88, 12, 0.12) 0%, rgba(15, 23, 42, 0.98) 75%);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: #f8fafc;
+            padding: 1.5rem;
+            margin: 0;
+        }
+        .offline-card {
+            max-width: 460px;
+            width: 100%;
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.25rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+            text-align: center;
+            padding: 2.5rem 2rem;
+            animation: fadeIn 0.4s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .offline-icon-wrapper {
+            width: 88px;
+            height: 88px;
+            margin: 0 auto 1.5rem auto;
+            border-radius: 50%;
+            background: rgba(234, 88, 12, 0.15);
+            border: 2px dashed rgba(234, 88, 12, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: #f97316;
+            animation: pulse 2.5s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.85; }
+        }
+        .btn-retry {
+            background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 0.75rem 1.75rem;
+            border-radius: 0.75rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
+        }
+        .btn-retry:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(234, 88, 12, 0.5);
+            color: white;
+        }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.35rem 0.85rem;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="offline-card">
+        <div class="mb-3">
+            <img src="assets/img/logo-unpam.png" alt="Logo UNPAM" style="height: 52px; width: auto; object-fit: contain;">
+        </div>
+
+        <div class="status-badge" id="network-status">
+            <i class="fa-solid fa-wifi-slash"></i>
+            <span>Mode Offline</span>
+        </div>
+
+        <div class="offline-icon-wrapper">
+            <i class="fa-solid fa-cloud-slash"></i>
+        </div>
+
+        <h4 class="fw-bold mb-2">Koneksi Internet Terputus</h4>
+        <p class="text-secondary small mb-4">
+            Anda sedang tidak terhubung ke jaringan internet. Halaman ini membutuhkan koneksi aktif untuk sinkronisasi inventaris dan database laporan lab.
+        </p>
+
+        <div class="d-grid gap-2">
+            <button class="btn btn-retry d-flex align-items-center justify-content-center gap-2" id="retry-btn">
+                <i class="fa-solid fa-rotate-right"></i>
+                <span>Coba Muat Ulang</span>
+            </button>
+            <a href="index.php" class="btn btn-outline-secondary btn-sm mt-1" style="border-radius: 0.65rem;">
+                <i class="fa-solid fa-house me-1"></i> Kembali ke Dashboard
+            </a>
+        </div>
+
+        <div class="mt-4 pt-3 border-top border-secondary border-opacity-25 text-muted" style="font-size: 0.76rem;">
+            <i class="fa-solid fa-circle-info me-1 text-warning"></i>
+            <span>Tips: Periksa koneksi Wi-Fi kampus UNPAM atau data seluler di HP Anda. Halaman akan otomatis termuat saat kembali online.</span>
+        </div>
+    </div>
+
+    <script>
+        // Check saved theme
+        const savedTheme = localStorage.getItem('aslab_theme');
+        if (savedTheme) {
+            document.documentElement.setAttribute('data-bs-theme', savedTheme);
+        }
+
+        // Retry button
+        const retryBtn = document.getElementById('retry-btn');
+        retryBtn.addEventListener('click', function() {
+            retryBtn.disabled = true;
+            retryBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Memeriksa...';
+            setTimeout(() => {
+                window.location.reload();
+            }, 600);
+        });
+
+        // Auto reload when back online
+        window.addEventListener('online', function() {
+            const statusBadge = document.getElementById('network-status');
+            if (statusBadge) {
+                statusBadge.className = 'status-badge bg-success bg-opacity-25 text-success border border-success border-opacity-25';
+                statusBadge.innerHTML = '<i class="fa-solid fa-circle-check"></i> <span>Koneksi Tersambung! Memuat...</span>';
+            }
+            setTimeout(() => {
+                window.location.reload();
+            }, 800);
+        });
+    </script>
+</body>
+</html>

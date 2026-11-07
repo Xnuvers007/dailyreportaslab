@@ -147,13 +147,18 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     <meta name="twitter:card" content="summary">
     <meta name="twitter:image" content="assets/img/logo-unpam.png">
     
-    <!-- Favicon & PWA Theme -->
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/logo-unpam.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="assets/img/logo-unpam.png">
-    <link rel="shortcut icon" href="assets/img/logo-unpam.png">
-    <meta name="theme-color" content="#f97316">
+    <!-- Favicon & PWA Settings -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/icons/icon-72.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/img/icons/icon-192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/img/icons/apple-touch-icon.png">
+    <link rel="shortcut icon" href="favicon.ico">
+    <meta name="theme-color" content="#ea580c">
+    <meta name="application-name" content="AslabReport">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="AslabReport">
     
     <!-- Script Anti-Flicker Dark/Light Theme -->
     <script>
@@ -278,6 +283,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     <script src="assets/js/animations.js"></script>
     <script src="assets/js/background3d.js"></script>
     <script src="assets/js/login-avatar3d.js"></script>
+    <script src="assets/js/pwa.js"></script>
     <script src="assets/js/app.js"></script>
 </body>
 </html>

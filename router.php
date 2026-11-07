@@ -21,10 +21,22 @@ if (preg_match('#(^/(router\.php|Dockerfile|docker-compose\.yml|\.dockerignore|\
     exit("404 Not Found.");
 }
 
-// 3. SAJIKAN ASET STATIS PUBLIK YANG AMAN (Folder assets/: CSS, JS, Gambar UI, Font)
-if (preg_match('#^/assets/#i', $uri_path)) {
+// 3. SAJIKAN ASET STATIS PUBLIK YANG AMAN (Folder assets/, manifest.json, sw.js, offline.html, favicon)
+if (preg_match('#^/(assets/|manifest\.json$|sw\.js$|offline\.html$|favicon\.(ico|png)$)#i', $uri_path)) {
     $asset_file = __DIR__ . $uri_path;
     if (is_file($asset_file)) {
+        if ($uri_path === '/sw.js') {
+            header("Content-Type: application/javascript; charset=utf-8");
+            header("Service-Worker-Allowed: /");
+            header("Cache-Control: no-cache");
+            readfile($asset_file);
+            exit;
+        }
+        if ($uri_path === '/manifest.json') {
+            header("Content-Type: application/manifest+json; charset=utf-8");
+            readfile($asset_file);
+            exit;
+        }
         return false; // Serahkan ke internal web server untuk melayani file statis
     }
 }
