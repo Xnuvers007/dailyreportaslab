@@ -13,14 +13,19 @@ if (is_logged_in()) {
 $error = null;
 $flash = get_flash();
 
-// Validasi Redirect Aman (Anti-Open Redirect dengan Whitelist Ketat)
-$redirect = $_GET['redirect'] ?? $_POST['redirect'] ?? 'index.php';
+// Validasi Redirect Aman (Anti-Open Redirect dengan Reconstruct Whitelist Ketat)
+$redirect_input = (string)($_GET['redirect'] ?? $_POST['redirect'] ?? 'index.php');
 $allowed_targets = ['index.php', 'buat-laporan.php', 'riwayat.php', 'detail.php', 'kelola-aslab.php', 'log-aktivitas.php'];
-$target_path = parse_url($redirect, PHP_URL_PATH) ?: 'index.php';
-$base_target = basename($target_path);
+$parsed_url = parse_url($redirect_input);
+$base_target = basename($parsed_url['path'] ?? 'index.php');
 
-if (!in_array($base_target, $allowed_targets) || preg_match('/^(https?:|\/\/|\\\\)/i', $redirect) || preg_match('/[\\r\\n]/', $redirect)) {
+if (!in_array($base_target, $allowed_targets, true)) {
     $redirect = 'index.php';
+    $base_target = 'index.php';
+} else {
+    // Bangun URL lokal yang aman secara eksplisit, buang semua skema, host, dan awalan path eksternal
+    $query_part = !empty($parsed_url['query']) ? '?' . $parsed_url['query'] : '';
+    $redirect = $base_target . $query_part;
 }
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
@@ -31,7 +36,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 
     if (!validate_csrf_token($csrf_token)) {
         $error = "Token sesi keamanan tidak valid. Silakan coba kembali.";
-        record_log('LOGIN_CSRF_FAILED', "Percobaan login ditolak: Token CSRF tidak valid", 'DANGER', $username ?: 'Unknown');
+        // PERBAIKAN VULNERABILITY (Anti-Account Lockout DoS via CSRF):
+        // Jangan asosiasikan input username dari request yang token CSRF-nya tidak valid ke akun pengguna.
+        // Ini mencegah penyerang mengunci akun korban dengan spamming invalid CSRF token.
+        record_log('LOGIN_CSRF_FAILED', "Percobaan login ditolak: Token CSRF tidak valid dari IP " . get_client_ip(), 'DANGER', 'Tamu (CSRF Mismatch)');
     } else {
         // Delay kecil untuk mitigasi timing attack
         usleep(150000); // 150ms
@@ -39,25 +47,41 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         if (empty($username) || empty($password)) {
             $error = "Silakan masukkan username dan password.";
         } else {
-            // RATE LIMITING & BRUTE-FORCE LOCKOUT CHECK (OWASP Compliant)
-            // Batasi maksimal 5 kegagalan login dalam jendela waktu 15 menit per IP / Username
+            // RATE LIMITING & BRUTE-FORCE LOCKOUT CHECK (OWASP Compliant & Anti-DoS)
             $client_ip = get_client_ip();
             $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
             $time_sql = ($driver === 'sqlite') 
                 ? "created_at >= datetime('now', '-15 minutes')" 
                 : "created_at >= DATE_SUB(NOW(), INTERVAL 15 MINUTE)";
 
-            $stmt_rate = $pdo->prepare("SELECT COUNT(*) FROM `activity_logs` 
-                WHERE `action` IN ('LOGIN_FAILED', 'LOGIN_CSRF_FAILED') 
-                AND (`ip_address` = :ip OR `username` = :uname) 
+            // A. Rate Limiting Tingkat IP (Mencegah bot, flood, & credential stuffing massal)
+            // Batasi maksimal 15 kegagalan dari IP yang sama dalam 15 menit
+            $stmt_ip_rate = $pdo->prepare("SELECT COUNT(*) FROM `activity_logs` 
+                WHERE `ip_address` = :ip 
+                AND `action` IN ('LOGIN_FAILED', 'LOGIN_CSRF_FAILED') 
                 AND {$time_sql}");
-            $stmt_rate->execute([':ip' => $client_ip, ':uname' => $username]);
-            $failed_attempts = (int)$stmt_rate->fetchColumn();
+            $stmt_ip_rate->execute([':ip' => $client_ip]);
+            $ip_failed_attempts = (int)$stmt_ip_rate->fetchColumn();
 
-            $max_allowed_attempts = 5;
-            if ($failed_attempts >= $max_allowed_attempts) {
-                $error = "Terlalu banyak percobaan login yang gagal ({$failed_attempts}x). Akses login Anda dibatasi sementara demi keamanan. Silakan coba kembali dalam 15 menit.";
-                record_log('LOGIN_RATE_LIMITED', "Percobaan login diblokir oleh Rate Limiting ({$failed_attempts}x percobaan gagal)", 'DANGER', $username);
+            // B. Rate Limiting Tingkat Akun (Mencegah password guessing terarah ke akun tertentu)
+            // Batasi maksimal 5 kegagalan kata sandi yang valid CSRF-nya untuk username target
+            // PENTING: LOGIN_CSRF_FAILED TIDAK dihitung di sini agar akun korban tidak bisa di-DoS
+            $stmt_user_rate = $pdo->prepare("SELECT COUNT(*) FROM `activity_logs` 
+                WHERE `username` = :uname 
+                AND `action` = 'LOGIN_FAILED' 
+                AND {$time_sql}");
+            $stmt_user_rate->execute([':uname' => $username]);
+            $user_failed_attempts = (int)$stmt_user_rate->fetchColumn();
+
+            $max_user_attempts = 5;
+            $max_ip_attempts   = 15;
+
+            if ($ip_failed_attempts >= $max_ip_attempts) {
+                $error = "Terlalu banyak percobaan masuk dari koneksi/IP Anda ({$ip_failed_attempts}x). Akses login dibatasi sementara demi keamanan. Silakan coba kembali dalam 15 menit.";
+                record_log('LOGIN_RATE_LIMITED', "Akses login IP {$client_ip} dibatasi oleh Rate Limiter ({$ip_failed_attempts}x percobaan gagal)", 'DANGER', $username);
+            } elseif ($user_failed_attempts >= $max_user_attempts) {
+                $error = "Terlalu banyak percobaan kata sandi yang salah pada akun ini ({$user_failed_attempts}x). Akun dibekukan sementara demi keamanan. Silakan coba kembali dalam 15 menit.";
+                record_log('LOGIN_RATE_LIMITED', "Akun '{$username}' dibekukan sementara oleh Brute-force Guard ({$user_failed_attempts}x password salah)", 'DANGER', $username);
             } else {
                 try {
                     $stmt = $pdo->prepare("SELECT * FROM `users` WHERE `username` = :username LIMIT 1");
@@ -78,7 +102,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                         // Role-Based Redirect Guard (Defense-in-Depth):
                         // Jika akun bukan admin tetapi mencoba redirect ke halaman admin, arahkan ke index.php
                         $admin_only_pages = ['kelola-aslab.php', 'log-aktivitas.php'];
-                        if ($user['role'] !== 'admin' && in_array($base_target, $admin_only_pages)) {
+                        if ($user['role'] !== 'admin' && in_array($base_target, $admin_only_pages, true)) {
                             $redirect = 'index.php';
                         }
 
@@ -86,10 +110,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                         header("Location: " . $redirect);
                         exit;
                     } else {
-                        $sisa = max(0, $max_allowed_attempts - ($failed_attempts + 1));
-                        $peringatan_sisa = ($sisa > 0) ? " Sisa percobaan: {$sisa}x sebelum akun/IP dibekukan sementara." : "";
+                        $sisa = max(0, $max_user_attempts - ($user_failed_attempts + 1));
+                        $peringatan_sisa = ($sisa > 0) ? " Sisa percobaan: {$sisa}x sebelum akun dibekukan sementara." : "";
                         $error = "Username atau password yang Anda masukkan salah." . $peringatan_sisa;
-                        record_log('LOGIN_FAILED', "Percobaan login gagal untuk username '{$username}'", 'WARNING', $username);
+                        record_log('LOGIN_FAILED', "Percobaan login gagal (password salah) untuk username '{$username}'", 'WARNING', $username);
                     }
                 } catch (PDOException $e) {
                     error_log("Login DB Error: " . $e->getMessage());

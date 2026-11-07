@@ -26,6 +26,16 @@ if (!$laporan) {
 }
 
 $page_title = "Edit Laporan - " . date('d/m/Y', strtotime($laporan['tanggal']));
+$user = current_user();
+
+// Kontrol Akses Berbasis Kepemilikan (Anti-IDOR / Broken Access Control):
+// Hanya Admin atau petugas pembuat laporan yang berhak mengedit laporan ini.
+if (!is_admin() && !empty($laporan['user_id']) && (int)$laporan['user_id'] !== (int)$user['id']) {
+    set_flash('danger', "Akses ditolak. Anda hanya berhak mengedit laporan yang Anda buat sendiri. Hubungi Administrator jika perlu perubahan.");
+    header("Location: detail.php?id=" . (int)$id);
+    exit;
+}
+
 $errors = [];
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
@@ -65,10 +75,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 
     $foto_filename = $laporan['foto_dokumentasi'];
 
-    // Jika user mencentang hapus foto (Anti-Path-Traversal)
-    $uploads_dir = realpath(__DIR__ . '/uploads');
+    // Jika user mencentang hapus foto (Anti-Path-Traversal & Server-Agnostic Storage)
+    $uploads_dir = get_uploads_directory();
     if ($hapus_foto && $foto_filename) {
-        $file_to_delete = __DIR__ . '/uploads/' . basename($foto_filename);
+        $file_to_delete = $uploads_dir . DIRECTORY_SEPARATOR . basename($foto_filename);
         $real_delete    = realpath($file_to_delete);
         if ($real_delete && $uploads_dir && strpos($real_delete, $uploads_dir) === 0 && is_file($real_delete)) {
             @unlink($real_delete);
@@ -79,11 +89,11 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     // Jika user mengunggah foto baru
     if (isset($_FILES['foto_dokumentasi']) && $_FILES['foto_dokumentasi']['error'] !== UPLOAD_ERR_NO_FILE) {
         try {
-            $new_foto = handle_secure_upload($_FILES['foto_dokumentasi'], __DIR__ . '/uploads/');
+            $new_foto = handle_secure_upload($_FILES['foto_dokumentasi']);
             if ($new_foto) {
                 // Hapus foto lama jika ada secara aman
                 if (!empty($laporan['foto_dokumentasi'])) {
-                    $old_file = __DIR__ . '/uploads/' . basename($laporan['foto_dokumentasi']);
+                    $old_file = $uploads_dir . DIRECTORY_SEPARATOR . basename($laporan['foto_dokumentasi']);
                     $real_old = realpath($old_file);
                     if ($real_old && $uploads_dir && strpos($real_old, $uploads_dir) === 0 && is_file($real_old)) {
                         @unlink($real_old);

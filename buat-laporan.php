@@ -78,7 +78,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     $foto_filename = null;
     if (isset($_FILES['foto_dokumentasi']) && $_FILES['foto_dokumentasi']['error'] !== UPLOAD_ERR_NO_FILE) {
         try {
-            $foto_filename = handle_secure_upload($_FILES['foto_dokumentasi'], __DIR__ . '/uploads/');
+            $foto_filename = handle_secure_upload($_FILES['foto_dokumentasi']);
         } catch (Exception $e) {
             $errors[] = "Gagal upload foto: " . $e->getMessage();
         }

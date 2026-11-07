@@ -81,18 +81,23 @@ require_once __DIR__ . '/includes/header.php';
             <span>Cetak</span>
         </button>
         <?php if ($user): ?>
-            <a href="edit-laporan.php?id=<?= (int)$laporan['id'] ?>" class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1">
-                <i class="fa-solid fa-pen-to-square"></i>
-                <span>Edit</span>
-            </a>
-            <button type="button" class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                <i class="fa-solid fa-trash"></i>
-                <span>Hapus</span>
-            </button>
+            <?php 
+            $can_modify = is_admin() || empty($laporan['user_id']) || ((int)$laporan['user_id'] === (int)$user['id']);
+            if ($can_modify): 
+            ?>
+                <a href="edit-laporan.php?id=<?= (int)$laporan['id'] ?>" class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    <span>Edit</span>
+                </a>
+                <button type="button" class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    <i class="fa-solid fa-trash"></i>
+                    <span>Hapus</span>
+                </button>
+            <?php endif; ?>
         <?php else: ?>
-            <a href="login.php?redirect=<?= urlencode('edit-laporan.php?id=' . (int)$laporan['id']) ?>" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1" title="Login aslab untuk mengedit">
+            <a href="login.php?redirect=<?= urlencode('detail.php?id=' . (int)$laporan['id']) ?>" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1" title="Login aslab">
                 <i class="fa-solid fa-lock"></i>
-                <span>Login untuk Edit</span>
+                <span>Login Aslab</span>
             </a>
         <?php endif; ?>
     </div>

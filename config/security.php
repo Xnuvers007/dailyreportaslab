@@ -13,13 +13,17 @@ function send_security_headers() {
     }
 }
 
-// Inisialisasi Session Aman
+// Inisialisasi Session Aman (Anti-Session Fixation & Anti-Session Hijacking)
 function start_secure_session() {
     if (session_status() === PHP_SESSION_NONE) {
         $is_https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
         
+        // Mencegah Session Fixation: server menolak session ID inisiasi klien yang belum ada
+        ini_set('session.use_strict_mode', '1');
+        ini_set('session.cookie_httponly', '1');
+
         session_set_cookie_params([
-            'lifetime' => 86400, // 1 hari
+            'lifetime' => 86400, // 1 hari batas cookie
             'path'     => '/',
             'domain'   => '',
             'secure'   => $is_https,
@@ -28,6 +32,15 @@ function start_secure_session() {
         ]);
         
         session_start();
+
+        // Idle Session Timeout (2 Jam) untuk keamanan komputer bersama di laboratorium
+        $idle_timeout = 7200; // 2 jam
+        if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > $idle_timeout)) {
+            session_unset();
+            session_destroy();
+            session_start();
+        }
+        $_SESSION['last_activity'] = time();
     }
     send_security_headers();
 }
@@ -86,13 +99,31 @@ function validate_csrf_token($token) {
 }
 
 /**
+ * Dapatkan direktori penyimpanan upload foto secara aman dan server-agnostic.
+ * Mendukung penyimpanan di luar web root via env UPLOADS_DIR atau folder storage/
+ */
+function get_uploads_directory() {
+    if (getenv('UPLOADS_DIR') && is_dir(getenv('UPLOADS_DIR'))) {
+        return realpath(getenv('UPLOADS_DIR'));
+    }
+    $private_storage = __DIR__ . '/../../storage/uploads';
+    if (is_dir($private_storage)) {
+        return realpath($private_storage);
+    }
+    return realpath(__DIR__ . '/../uploads') ?: (__DIR__ . '/../uploads');
+}
+
+/**
  * Secure Image Upload Handler (Anti-RCE, Anti-Extension Tampering, Anti-MIME Spoofing)
  *
  * @param array $file_array Elemen dari $_FILES['nama_input']
- * @param string $destination_dir Path folder tujuan
+ * @param string|null $destination_dir Path folder tujuan (opsional, default via get_uploads_directory())
  * @return string|false Nama file baru yang aman, atau false/throw jika gagal
  */
-function handle_secure_upload($file_array, $destination_dir = __DIR__ . '/../uploads/') {
+function handle_secure_upload($file_array, $destination_dir = null) {
+    if ($destination_dir === null) {
+        $destination_dir = get_uploads_directory();
+    }
     // 1. Cek apakah ada file yang di-upload
     if (!isset($file_array) || $file_array['error'] === UPLOAD_ERR_NO_FILE) {
         return null; // Tidak ada file diupload (opsional)
@@ -135,10 +166,10 @@ function handle_secure_upload($file_array, $destination_dir = __DIR__ . '/../upl
         throw new Exception("File gambar rusak atau bukan format gambar valid.");
     }
 
-    // 5. Generate nama file ACAK baru (Cryptographically Secure)
+    // 5. Generate nama file ACAK baru (Cryptographically Secure - 128 bit entropy)
     // Menghilangkan nama asli user sepenuhnya untuk mencegah path traversal (../), null byte, dan double extension (shell.php.jpg)
     $extension = $allowed_mimes[$real_mime];
-    $safe_filename = 'doc_' . date('Ymd_His') . '_' . bin2hex(random_bytes(8)) . '.' . $extension;
+    $safe_filename = 'doc_' . date('Ymd_His') . '_' . bin2hex(random_bytes(16)) . '.' . $extension;
 
     // Pastikan folder tujuan ada
     if (!is_dir($destination_dir)) {

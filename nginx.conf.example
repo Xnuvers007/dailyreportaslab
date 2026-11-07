@@ -1,0 +1,70 @@
+# ==============================================================================
+# NGINX VIRTUAL HOST CONFIGURATION EXAMPLE
+# Sistem Laporan Harian Aslab (Universitas Pamulang)
+# ==============================================================================
+# Gunakan konfigurasi ini jika aplikasi di-deploy pada server Nginx (LEMP Stack).
+# Letakkan di: /etc/nginx/sites-available/dailyreportaslab
+# dan symlink ke: /etc/nginx/sites-enabled/
+# ==============================================================================
+
+server {
+    listen 80;
+    server_name lab.unpam.ac.id; # Ganti dengan domain atau IP server Anda
+    root /var/www/dailyreportaslab; # Path direktori root aplikasi di server
+    index index.php index.html;
+
+    # Batas ukuran upload foto (5MB)
+    client_max_body_size 6M;
+
+    # Security Headers Standar
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+    # 1. BLOKIR AKSES LANGSUNG KE FOLDER UPLOADS (PRIVASI FOTO)
+    # Foto hanya boleh diakses melalui gatekeeper autentikasi: lihat-foto.php
+    location ^~ /uploads/ {
+        deny all;
+        return 403;
+    }
+
+    # 2. BLOKIR AKSES LANGSUNG KE FOLDER KONFIGURASI & INTERNAL
+    location ^~ /config/ {
+        deny all;
+        return 403;
+    }
+    location ^~ /includes/ {
+        deny all;
+        return 403;
+    }
+
+    # 3. BLOKIR FILE SENSITIF (.sql, .sqlite, .env, .git, .htaccess, .md, .log)
+    location ~* \.(sql|sqlite|db|env|ini|log|sh|bak|swp|md|git.*|htaccess|config)$ {
+        deny all;
+        return 404;
+    }
+
+    # 4. Routing Standar Web
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    # 5. Handler PHP FastCGI
+    location ~ \.php$ {
+        include fastcgi_params;
+        fastcgi_pass unix:/var/run/php/php8.2-fpm.sock; # Sesuaikan dengan versi PHP-FPM server
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_intercept_errors on;
+        fastcgi_buffer_size 16k;
+        fastcgi_buffers 4 16k;
+    }
+
+    # 6. Cache Asset Statis (CSS, JS, Gambar UI)
+    location ~* \.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+        expires 7d;
+        add_header Cache-Control "public, no-transform";
+        access_log off;
+    }
+}

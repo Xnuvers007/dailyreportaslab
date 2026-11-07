@@ -29,17 +29,25 @@ if ($id <= 0) {
 }
 
 try {
-    // Ambil data untuk mengecek file foto
-    $stmt = $pdo->prepare("SELECT `foto_dokumentasi` FROM `laporan` WHERE `id` = :id LIMIT 1");
+    // Ambil data untuk verifikasi kepemilikan dan file foto
+    $stmt = $pdo->prepare("SELECT `id`, `user_id`, `petugas_nama`, `tanggal`, `shift`, `foto_dokumentasi` FROM `laporan` WHERE `id` = :id LIMIT 1");
     $stmt->execute([':id' => $id]);
     $laporan = $stmt->fetch();
 
     if ($laporan) {
-        // Hapus file fisik foto secara aman jika ada (Anti-Path-Traversal)
+        $current_user = current_user();
+        // Kontrol Akses Berbasis Kepemilikan (Anti-IDOR): Hanya Admin atau pembuat laporan yang berhak menghapus
+        if (!is_admin() && !empty($laporan['user_id']) && (int)$laporan['user_id'] !== (int)$current_user['id']) {
+            set_flash('danger', "Akses ditolak. Anda hanya berhak menghapus laporan yang Anda buat sendiri. Hubungi Administrator jika perlu tindakan.");
+            header("Location: detail.php?id=" . (int)$id);
+            exit;
+        }
+
+        // Hapus file fisik foto secara aman jika ada (Anti-Path-Traversal & Server-Agnostic Storage)
         if (!empty($laporan['foto_dokumentasi'])) {
             $safe_filename = basename($laporan['foto_dokumentasi']);
-            $uploads_dir   = realpath(__DIR__ . '/uploads');
-            $file_path     = __DIR__ . '/uploads/' . $safe_filename;
+            $uploads_dir   = get_uploads_directory();
+            $file_path     = $uploads_dir . DIRECTORY_SEPARATOR . $safe_filename;
             $real_file     = realpath($file_path);
             if ($real_file && $uploads_dir && strpos($real_file, $uploads_dir) === 0 && is_file($real_file)) {
                 @unlink($real_file);
@@ -50,8 +58,8 @@ try {
         $delete_stmt = $pdo->prepare("DELETE FROM `laporan` WHERE `id` = :id");
         $delete_stmt->execute([':id' => $id]);
 
-        // Catat ke audit log
-        record_log('DELETE_REPORT', "Menghapus laporan ID #{$id}", 'DANGER');
+        // Catat ke audit log dengan detail laporan
+        record_log('DELETE_REPORT', "Menghapus laporan ID #{$id} ({$laporan['petugas_nama']} - " . date('d/m/Y', strtotime($laporan['tanggal'])) . " Shift {$laporan['shift']})", 'DANGER');
 
         set_flash('success', "Laporan berhasil dihapus secara permanen.");
     } else {

@@ -21,13 +21,13 @@ if (empty($file)) {
     die("Parameter file tidak ditentukan.");
 }
 
-// 3. Sanitasi Nama File & Cegah Path Traversal
+// 3. Sanitasi Nama File & Cegah Path Traversal (Server-Agnostic Storage Support)
 $safe_filename = basename($file);
-$uploads_dir   = realpath(__DIR__ . '/uploads');
-$target_path   = __DIR__ . '/uploads/' . $safe_filename;
+$uploads_dir   = get_uploads_directory();
+$target_path   = $uploads_dir . DIRECTORY_SEPARATOR . $safe_filename;
 $real_target   = realpath($target_path);
 
-// Validasi keberadaan file dan pastikan berada strictly di dalam direktori uploads/
+// Validasi keberadaan file dan pastikan berada strictly di dalam direktori penyimpanan foto
 if (!$real_target || !$uploads_dir || strpos($real_target, $uploads_dir) !== 0 || !is_file($real_target)) {
     http_response_code(404);
     die("Foto dokumentasi tidak ditemukan.");
@@ -50,6 +50,7 @@ if (!isset($allowed_mimes[$mime_type])) {
 }
 
 // 5. Kirim Security Headers & Sajikan File
+session_write_close(); // Lepas session lock agar request halaman lain tidak terblokir saat file disajikan
 header("Content-Type: " . $mime_type);
 header("Content-Length: " . filesize($real_target));
 header("Content-Disposition: inline; filename=\"" . $safe_filename . "\"");
