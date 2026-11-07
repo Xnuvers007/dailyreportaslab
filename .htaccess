@@ -4,14 +4,15 @@ Options -Indexes
 # Default charset
 AddDefaultCharset UTF-8
 
-# Block direct HTTP access to private directories (uploads, storage, config, includes)
+# Block direct HTTP access to private directories & sensitive deployment files
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteRule ^(uploads|storage|config|includes)(/.*)?$ - [F,L,NC]
+    RewriteRule ^(Dockerfile|docker-compose\.yml|router\.php|\.dockerignore|\.gitignore|\.env.*)$ - [F,L,NC]
 </IfModule>
 
 # Protect sensitive files & databases
-<FilesMatch "(?i)\.(sql|sqlite|db|env|ini|log|sh|bak|swp|md|json|lock|git.*)$">
+<FilesMatch "(?i)^(Dockerfile|docker-compose\.yml|router\.php|\.dockerignore|\.gitignore|\.env.*)$|\.(sql|sqlite|db|env|ini|log|sh|bak|swp|md|json|lock|git.*|yml|yaml|example|config)$">
     Order Deny,Allow
     Deny from all
     <IfModule mod_authz_core.c>

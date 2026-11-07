@@ -106,10 +106,24 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['action']) && 
         if ($target_id === (int)$currentUser['id']) {
             set_flash('danger', "Anda tidak dapat menghapus akun Anda sendiri.");
         } else {
+            // Mencegah penghapusan admin terakhir dalam sistem
+            $stmt_target = $pdo->prepare("SELECT `username`, `role` FROM `users` WHERE `id` = :id LIMIT 1");
+            $stmt_target->execute([':id' => $target_id]);
+            $target_user = $stmt_target->fetch();
+
+            if ($target_user && $target_user['role'] === 'admin') {
+                $admin_count = (int)$pdo->query("SELECT COUNT(*) FROM `users` WHERE `role` = 'admin'")->fetchColumn();
+                if ($admin_count <= 1) {
+                    set_flash('danger', "Penghapusan dibatalkan: Tidak dapat menghapus Administrator terakhir dalam sistem.");
+                    header("Location: kelola-aslab.php");
+                    exit;
+                }
+            }
+
             try {
                 $stmt_del = $pdo->prepare("DELETE FROM `users` WHERE `id` = :id");
                 $stmt_del->execute([':id' => $target_id]);
-                record_log('DELETE_USER', "Menghapus akun pengguna ID #{$target_id}", 'DANGER');
+                record_log('DELETE_USER', "Menghapus akun pengguna ID #{$target_id} (" . ($target_user ? $target_user['username'] : '') . ")", 'DANGER');
                 set_flash('success', "Akun aslab berhasil dihapus.");
             } catch (PDOException $e) {
                 set_flash('danger', "Gagal menghapus akun aslab.");

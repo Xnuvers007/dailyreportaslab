@@ -43,8 +43,8 @@ server {
         return 403;
     }
 
-    # 3. BLOKIR FILE SENSITIF (.sql, .sqlite, .env, .git, .htaccess, .md, .log)
-    location ~* \.(sql|sqlite|db|env|ini|log|sh|bak|swp|md|git.*|htaccess|config)$ {
+    # 3. BLOKIR FILE SENSITIF (.sql, .sqlite, .env, .git, .htaccess, .md, .log, .yml, .yaml, Docker)
+    location ~* (^/(router\.php|Dockerfile|docker-compose\.yml|\.dockerignore|\.gitignore|\.env.*)|\.(sql|sqlite|db|env|ini|log|sh|bak|swp|md|git.*|htaccess|config|yml|yaml|example))$ {
         deny all;
         return 404;
     }

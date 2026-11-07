@@ -14,8 +14,8 @@ if (preg_match('#^/(uploads|storage|config|includes)(/|$)#i', $uri_path)) {
     exit("403 Forbidden: Akses langsung ke direktori ini diblokir demi keamanan data privasi lab.");
 }
 
-// 2. BLOKIR FILE DATABASE & KONFIGURASI SENSITIF
-if (preg_match('#\.(sql|sqlite|db|env|ini|log|sh|bak|md|git.*|htaccess|config)$#i', $uri_path)) {
+// 2. BLOKIR FILE DATABASE, DEPLOYMENT, & KONFIGURASI SENSITIF
+if (preg_match('#(^/(router\.php|Dockerfile|docker-compose\.yml|\.dockerignore|\.gitignore|\.env.*)|\.(sql|sqlite|db|env|ini|log|sh|bak|md|git.*|htaccess|config|yml|yaml|example))$#i', $uri_path)) {
     http_response_code(404);
     header("Content-Type: text/plain; charset=utf-8");
     exit("404 Not Found.");
