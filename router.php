@@ -38,3 +38,4 @@ if ($uri_path !== '/' && is_file($target_file) && pathinfo($target_file, PATHINF
 
 // 5. DEFAULT KE INDEX
 require __DIR__ . '/index.php';
+
