@@ -199,7 +199,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         </div>
 
         <!-- 3D Interactive Mascot (Three.js Companion) -->
-        <div class="login-avatar-container text-center position-relative" style="height: 185px; margin-bottom: -18px; z-index: 12;">
+        <div class="login-avatar-container text-center position-relative" style="height: 200px; margin-bottom: -22px; z-index: 12; pointer-events: none;">
             <canvas id="login-avatar-canvas" style="width: 100%; height: 100%; display: block; outline: none;"></canvas>
         </div>
 
