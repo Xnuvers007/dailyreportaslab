@@ -73,6 +73,12 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         $errors[] = "Format tanggal tidak valid.";
     }
 
+    // Verifikasi Tulisan Konfirmasi Edit
+    $konfirmasi_edit = strtoupper(trim($_POST['konfirmasi_edit'] ?? ''));
+    if ($konfirmasi_edit !== 'KONFIRMASI') {
+        $errors[] = 'Tulisan konfirmasi salah! Harap ketik "KONFIRMASI" pada kolom konfirmasi untuk menyimpan perubahan.';
+    }
+
     $foto_filename = $laporan['foto_dokumentasi'];
 
     // Jika user mencentang hapus foto (Anti-Path-Traversal & Server-Agnostic Storage)
@@ -510,6 +516,35 @@ require_once __DIR__ . '/includes/header.php';
 
                         </div>
 
+                    </div>
+                </div>
+            </div>
+
+            <!-- KARTU 5: Verifikasi Konfirmasi Perubahan -->
+            <div class="card mb-4 card-hover-lift border-start border-primary border-4">
+                <div class="card-header py-3 d-flex align-items-center gap-2">
+                    <div class="stat-icon-box stat-primary" style="width: 38px; height: 38px; font-size: 1.1rem;">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <div>
+                        <span class="fw-bold">5. Konfirmasi Perubahan Laporan</span>
+                        <div class="small text-muted" style="font-size: 0.75rem;">Verifikasi anti-salah simpan</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small mb-3">
+                        Untuk memastikan Anda benar-benar berniat memperbarui data inventaris ini, ketik tulisan <span class="badge bg-primary text-white">KONFIRMASI</span> pada kolom di bawah ini sebelum menyimpan perubahan:
+                    </p>
+                    <div class="row">
+                        <div class="col-12 col-md-6 col-lg-5">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-keyboard text-muted"></i></span>
+                                <input type="text" class="form-control" name="konfirmasi_edit" id="konfirmasi_edit" placeholder='Ketik "konfirmasi"' required autocomplete="off">
+                            </div>
+                            <div class="form-text small text-muted">
+                                Tidak membedakan huruf besar/kecil (bisa ketik: <code>konfirmasi</code> atau <code>KONFIRMASI</code>).
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

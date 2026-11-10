@@ -47,6 +47,35 @@ try {
             exit;
         }
 
+        // 1. Verifikasi Tulisan Konfirmasi ("KONFIRMASI" atau "HAPUS")
+        $konfirmasi_teks = strtoupper(trim($_POST['konfirmasi_teks'] ?? ''));
+        if ($konfirmasi_teks !== 'KONFIRMASI' && $konfirmasi_teks !== 'HAPUS') {
+            record_log('DELETE_FAILED_CONFIRMATION', "Penghapusan laporan ID #{$id} gagal: Tulisan konfirmasi tidak cocok ('{$konfirmasi_teks}')", 'WARNING');
+            set_flash('danger', 'Tulisan konfirmasi salah! Harap ketik "KONFIRMASI" dengan benar pada kotak konfirmasi.');
+            header("Location: detail.php?id=" . (int)$id);
+            exit;
+        }
+
+        // 2. Verifikasi Password Akun Administrator (Two-Step Verification)
+        $admin_password = (string)($_POST['admin_password'] ?? '');
+        if (empty($admin_password)) {
+            set_flash('danger', 'Password akun Administrator wajib diisi untuk memverifikasi wewenang penghapusan.');
+            header("Location: detail.php?id=" . (int)$id);
+            exit;
+        }
+
+        // Ambil hash password admin terkini dari database
+        $stmt_admin = $pdo->prepare("SELECT `password_hash` FROM `users` WHERE `id` = :uid LIMIT 1");
+        $stmt_admin->execute([':uid' => $current_user['id']]);
+        $admin_data = $stmt_admin->fetch();
+
+        if (!$admin_data || !password_verify($admin_password, $admin_data['password_hash'])) {
+            record_log('DELETE_FAILED_PASSWORD', "Penghapusan laporan ID #{$id} gagal: Password akun Administrator salah", 'WARNING');
+            set_flash('danger', 'Password Administrator salah! Penghapusan laporan dibatalkan demi keamanan.');
+            header("Location: detail.php?id=" . (int)$id);
+            exit;
+        }
+
         // Hapus file fisik foto secara aman jika ada (Anti-Path-Traversal & Server-Agnostic Storage)
         if (!empty($laporan['foto_dokumentasi'])) {
             $safe_filename = basename($laporan['foto_dokumentasi']);

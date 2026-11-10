@@ -274,34 +274,79 @@ require_once __DIR__ . '/includes/header.php';
 </div>
 
 <?php if (is_admin()): ?>
-<!-- Delete Confirmation Modal (Khusus Administrator) -->
+<!-- Delete Confirmation Modal (Khusus Administrator dengan Verifikasi Password & Tulisan Konfirmasi) -->
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header border-bottom-0 pb-0">
-                <h5 class="modal-title fw-bold text-danger" id="deleteModalLabel">
-                    <i class="fa-solid fa-triangle-exclamation me-1"></i> Hapus Laporan
+        <div class="modal-content border-danger border-opacity-50 shadow-lg">
+            <div class="modal-header border-bottom border-danger border-opacity-25 bg-danger bg-opacity-10 py-3">
+                <h5 class="modal-title fw-bold text-danger d-flex align-items-center gap-2" id="deleteModalLabel">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>Verifikasi Hapus Laporan (Admin)</span>
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body py-3">
-                <p class="mb-1">Apakah Anda yakin ingin menghapus laporan pada tanggal <strong><?= date('d/m/Y', strtotime($laporan['tanggal'])) ?> (Shift <?= e($laporan['shift']) ?>)</strong>?</p>
-                <p class="small text-muted mb-0">Laporan dan file foto dokumentasi terkait akan dihapus secara permanen dari server.</p>
-            </div>
-            <div class="modal-footer border-top-0 pt-0">
-                <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Batal</button>
-                <form action="hapus-laporan.php" method="POST" class="d-inline">
-                    <?= csrf_input() ?>
-                    <input type="hidden" name="id" value="<?= (int)$laporan['id'] ?>">
-                    <button type="submit" class="btn btn-danger btn-sm d-flex align-items-center gap-1">
+            <form action="hapus-laporan.php" method="POST" id="formHapusLaporan">
+                <?= csrf_input() ?>
+                <input type="hidden" name="id" value="<?= (int)$laporan['id'] ?>">
+                
+                <div class="modal-body py-3">
+                    <div class="alert alert-danger bg-danger bg-opacity-10 border-danger border-opacity-25 small mb-3">
+                        <i class="fa-solid fa-circle-exclamation me-1"></i>
+                        Tindakan ini <strong>bersifat permanen</strong>. Laporan shift <strong><?= e($laporan['shift']) ?> (<?= date('d/m/Y', strtotime($laporan['tanggal'])) ?>)</strong> beserta bukti foto akan dihapus dari server.
+                    </div>
+
+                    <!-- Input 1: Password Akun Admin -->
+                    <div class="mb-3">
+                        <label for="admin_password" class="form-label small fw-semibold text-main">
+                            1. Masukkan Password Akun Admin Anda (@<?= e($user['username']) ?>)
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-lock text-danger"></i></span>
+                            <input type="password" class="form-control" id="admin_password" name="admin_password" placeholder="Password akun admin Anda" required autocomplete="current-password">
+                            <button class="btn btn-outline-secondary" type="button" id="toggleAdminPassBtn" onclick="togglePasswordVisibility('admin_password', 'toggleAdminPassIcon')">
+                                <i class="fa-solid fa-eye" id="toggleAdminPassIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Input 2: Tulisan Konfirmasi -->
+                    <div class="mb-2">
+                        <label for="konfirmasi_teks" class="form-label small fw-semibold text-main">
+                            2. Ketik tulisan <span class="badge bg-danger text-white">KONFIRMASI</span> di bawah ini:
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-keyboard text-muted"></i></span>
+                            <input type="text" class="form-control" id="konfirmasi_teks" name="konfirmasi_teks" placeholder='Ketik "konfirmasi"' required autocomplete="off">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer border-top py-2 bg-body-tertiary">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-danger btn-sm d-flex align-items-center gap-2 px-3 fw-semibold shadow-sm">
                         <i class="fa-solid fa-trash"></i>
-                        <span>Ya, Hapus Sekarang</span>
+                        <span>Verifikasi & Hapus Permanen</span>
                     </button>
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
     </div>
 </div>
+
+<script>
+function togglePasswordVisibility(inputId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+    if (!input) return;
+    if (input.type === 'password') {
+        input.type = 'text';
+        if (icon) icon.className = 'fa-solid fa-eye-slash';
+    } else {
+        input.type = 'password';
+        if (icon) icon.className = 'fa-solid fa-eye';
+    }
+}
+</script>
 <?php endif; ?>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
