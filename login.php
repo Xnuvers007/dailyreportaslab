@@ -100,10 +100,11 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                         // Login Berhasil - Regenerasi ID sesi untuk mencegah Session Fixation
                         session_regenerate_id(true);
                         
-                        $_SESSION['user_id']      = $user['id'];
-                        $_SESSION['username']     = $user['username'];
-                        $_SESSION['nama_lengkap'] = $user['nama_lengkap'];
-                        $_SESSION['role']         = $user['role'];
+                        $_SESSION['user_id']             = $user['id'];
+                        $_SESSION['username']            = $user['username'];
+                        $_SESSION['nama_lengkap']        = $user['nama_lengkap'];
+                        $_SESSION['role']                = $user['role'];
+                        $_SESSION['auth_hash_signature'] = substr($user['password_hash'], 0, 16);
 
                         record_log('LOGIN_SUCCESS', "Login berhasil sebagai '{$user['nama_lengkap']}' ({$user['role']})", 'SUCCESS', $user['username']);
 

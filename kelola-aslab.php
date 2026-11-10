@@ -121,6 +121,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['action']) && 
             }
 
             try {
+                // Lepaskan kepemilikan laporan ke NULL agar tidak menjadi foreign key rusak
+                $stmt_detach = $pdo->prepare("UPDATE `laporan` SET `user_id` = NULL WHERE `user_id` = :id");
+                $stmt_detach->execute([':id' => $target_id]);
+
                 $stmt_del = $pdo->prepare("DELETE FROM `users` WHERE `id` = :id");
                 $stmt_del->execute([':id' => $target_id]);
                 record_log('DELETE_USER', "Menghapus akun pengguna ID #{$target_id} (" . ($target_user ? $target_user['username'] : '') . ")", 'DANGER');

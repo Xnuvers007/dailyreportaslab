@@ -9,18 +9,23 @@ require_once __DIR__ . '/database.php';
 require_once __DIR__ . '/auth.php';
 
 /**
- * Dapatkan IP Address Klien secara aman (Anti-IP Spoofing & Mendukung Reverse Proxy)
- * Mencegah pemalsuan header X-Forwarded-For dari koneksi publik langsung.
+ * Dapatkan IP Address Klien secara aman (Anti-IP Spoofing & Strict Reverse Proxy Trust)
+ * Mencegah pemalsuan header X-Forwarded-For atau spoofing IP di jaringan internal LAN/WiFi.
  */
 function get_client_ip() {
     $remote_addr = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
 
-    // Periksa apakah koneksi berasal dari proxy internal / trusted proxy (localhost atau private network)
-    $trusted_loopbacks = ['127.0.0.1', '::1'];
-    $is_from_proxy = in_array($remote_addr, $trusted_loopbacks, true)
-        || filter_var($remote_addr, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false;
+    // Konfigurasi IP Reverse Proxy yang benar-benar tepercaya (Explicit Trusted Proxies)
+    // Default hanya mempercayai localhost loopback (127.0.0.1, ::1).
+    // Dapat diperluas melalui environment variable TRUSTED_PROXIES jika di belakang reverse proxy seperti Nginx/HAProxy.
+    $trusted_proxies_env = getenv('TRUSTED_PROXIES') ?: '127.0.0.1,::1';
+    $trusted_proxies = array_map('trim', explode(',', $trusted_proxies_env));
 
-    if ($is_from_proxy) {
+    // PENTING (OWASP & Anti-IP-Spoofing):
+    // Jangan pernah menganggap sembarang IP privat (10.x, 192.168.x) sebagai proxy tepercaya,
+    // karena di jaringan LAN kampus/laboratorium, IP privat adalah IP perangkat klien/pengguna!
+    // Hanya percayai forwarding header jika REMOTE_ADDR benar-benar cocok dengan daftar trusted proxy eksplisit.
+    if (in_array($remote_addr, $trusted_proxies, true)) {
         $proxy_headers = [
             'HTTP_CF_CONNECTING_IP',
             'HTTP_X_FORWARDED_FOR',
@@ -38,6 +43,7 @@ function get_client_ip() {
         }
     }
 
+    // Default aman: Selalu gunakan REMOTE_ADDR dari TCP socket
     if (filter_var($remote_addr, FILTER_VALIDATE_IP)) {
         return $remote_addr;
     }
