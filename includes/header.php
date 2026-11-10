@@ -36,7 +36,15 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET' && isset($page_action_map[$c
     <meta name="description" content="Sistem Informasi Pelaporan Harian dan Monitoring Inventaris Asisten Laboratorium Komputer Universitas Pamulang (UNPAM). Rekapitulasi proyektor, kabel roll, dan catatan operasional shift.">
     <meta name="keywords" content="aslab unpam, laporan harian aslab, universitas pamulang, unpam, lab komputer unpam, teknik informatika unpam, asisten laboratorium, inventaris lab">
     <meta name="author" content="Laboratorium Komputer Universitas Pamulang">
+    <?php
+    $private_pages = ['buat-laporan.php', 'edit-laporan.php', 'kelola-aslab.php', 'log-aktivitas.php', 'detail.php'];
+    if (in_array($current_page, $private_pages, true) || is_logged_in()): 
+    ?>
     <meta name="robots" content="noindex, nofollow">
+    <?php else: ?>
+    <meta name="robots" content="index, follow">
+    <?php endif; ?>
+    <link rel="sitemap" type="application/xml" title="Sitemap" href="sitemap.xml">
     
     <!-- Open Graph / Facebook / WhatsApp Share Preview -->
     <meta property="og:type" content="website">

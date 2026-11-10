@@ -20,14 +20,14 @@ AddDefaultCharset UTF-8
     </IfModule>
 </FilesMatch>
 
-# Allow manifest.json for Progressive Web App (PWA)
-<Files "manifest.json">
+# Allow public SEO & PWA files: manifest.json, robots.txt, sitemap.xml
+<FilesMatch "^(manifest\.json|robots\.txt|sitemap\.xml)$">
     Order Allow,Deny
     Allow from all
     <IfModule mod_authz_core.c>
         Require all granted
     </IfModule>
-</Files>
+</FilesMatch>
 
 # Security Headers
 <IfModule mod_headers.c>

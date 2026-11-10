@@ -1,0 +1,38 @@
+# ========================================================
+# ASLAB REPORT - UNIVERSITAS PAMULANG
+# Sistem Informasi Inventaris & Laporan Harian Laboratorium
+# ========================================================
+
+User-agent: *
+
+# Izinkan perayapan halaman publik / informasi utama
+Allow: /
+Allow: /index.php
+Allow: /login.php
+Allow: /riwayat.php
+Allow: /offline.html
+Allow: /manifest.json
+Allow: /assets/
+
+# Lindungi direktori sistem, konfigurasi, dan file privat
+Disallow: /config/
+Disallow: /includes/
+Disallow: /storage/
+Disallow: /uploads/
+
+# Lindungi endpoint administratif dan operasional privat
+Disallow: /kelola-aslab.php
+Disallow: /log-aktivitas.php
+Disallow: /buat-laporan.php
+Disallow: /edit-laporan.php
+Disallow: /hapus-laporan.php
+Disallow: /export-laporan.php
+Disallow: /lihat-foto.php
+Disallow: /logout.php
+
+# Cegah bot merayapi URL dengan parameter dinamis sensitif
+Disallow: /*?*id=*
+Disallow: /*?*action=*
+
+# Lokasi Sitemap Resmi
+Sitemap: https://dailyreportaslab.rf.gd/sitemap.xml
