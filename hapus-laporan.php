@@ -70,6 +70,7 @@ try {
         $admin_data = $stmt_admin->fetch();
 
         if (!$admin_data || !password_verify($admin_password, $admin_data['password_hash'])) {
+            usleep(200000); // Mitigasi timing attack & brute-force
             record_log('DELETE_FAILED_PASSWORD', "Penghapusan laporan ID #{$id} gagal: Password akun Administrator salah", 'WARNING');
             set_flash('danger', 'Password Administrator salah! Penghapusan laporan dibatalkan demi keamanan.');
             header("Location: detail.php?id=" . (int)$id);

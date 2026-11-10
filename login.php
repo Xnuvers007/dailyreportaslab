@@ -100,6 +100,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                         // Login Berhasil - Regenerasi ID sesi untuk mencegah Session Fixation
                         session_regenerate_id(true);
                         
+                        // Perbarui token CSRF untuk konteks sesi terotentikasi (OWASP CSRF Token Rotation)
+                        $_SESSION['csrf_token']          = bin2hex(random_bytes(32));
                         $_SESSION['user_id']             = $user['id'];
                         $_SESSION['username']            = $user['username'];
                         $_SESSION['nama_lengkap']        = $user['nama_lengkap'];

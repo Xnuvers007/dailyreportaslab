@@ -3,6 +3,48 @@
  * Modul Keamanan: Anti-XSS, Anti-CSRF, Anti-RCE, & Secure File Upload
  */
 
+/**
+ * Deteksi apakah koneksi klien menggunakan HTTPS / SSL (Mendukung Direct SSL & Trusted Reverse Proxy Offloading)
+ * Memastikan cookie sesi selalu ber-flag Secure saat aplikasi diakses melalui HTTPS,
+ * sekalipun SSL di-terminate di load balancer / reverse proxy (Cloudflare, Nginx, InfinityFree).
+ */
+function is_ssl_connection() {
+    // 1. Cek koneksi langsung HTTPS atau port standar 443
+    if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+        return true;
+    }
+    if (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443) {
+        return true;
+    }
+
+    // 2. Override konfigurasi environment (misal diatur manual FORCE_HTTPS_COOKIE=true atau SESSION_COOKIE_SECURE=true)
+    if (getenv('FORCE_HTTPS_COOKIE') === 'true' || getenv('SESSION_COOKIE_SECURE') === 'true') {
+        return true;
+    }
+
+    // 3. Deteksi SSL dari Reverse Proxy (HANYA dipercayai jika request berasal dari daftar proxy tepercaya)
+    $remote_addr = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+    $trusted_proxies_env = getenv('TRUSTED_PROXIES') ?: '127.0.0.1,::1';
+    $trusted_proxies = array_map('trim', explode(',', $trusted_proxies_env));
+
+    if (in_array($remote_addr, $trusted_proxies, true)) {
+        $proto = strtolower($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? $_SERVER['HTTP_X_FORWARDED_SSL'] ?? '');
+        if ($proto === 'https' || $proto === 'on') {
+            return true;
+        }
+
+        // Khusus header Cloudflare Flexible / Full SSL
+        if (!empty($_SERVER['HTTP_CF_VISITOR'])) {
+            $visitor = json_decode($_SERVER['HTTP_CF_VISITOR'], true);
+            if (isset($visitor['scheme']) && $visitor['scheme'] === 'https') {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 // Kirim Security & Anti-Cache Headers standar untuk halaman dinamis PHP
 function send_security_headers() {
     if (!headers_sent()) {
@@ -10,6 +52,12 @@ function send_security_headers() {
         header("X-Frame-Options: SAMEORIGIN");
         header("X-XSS-Protection: 1; mode=block");
         header("Referrer-Policy: strict-origin-when-cross-origin");
+        header("Permissions-Policy: camera=(), microphone=(), geolocation=()");
+
+        // HSTS jika koneksi HTTPS
+        if (is_ssl_connection()) {
+            header("Strict-Transport-Security: max-age=31536000; includeSubDomains");
+        }
 
         // KEAMANAN KOMPUTER BERSAMA (OWASP Shared Computer Protection):
         // Cegah penyimpanan respons dinamis di disk/browser cache agar data laporan & sesi
@@ -23,7 +71,7 @@ function send_security_headers() {
 // Inisialisasi Session Aman (Anti-Session Fixation & Anti-Session Hijacking)
 function start_secure_session() {
     if (session_status() === PHP_SESSION_NONE) {
-        $is_https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
+        $is_https = is_ssl_connection();
         
         // Mencegah Session Fixation: server menolak session ID inisiasi klien yang belum ada
         ini_set('session.use_strict_mode', '1');

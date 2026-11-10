@@ -42,9 +42,11 @@ function current_user() {
                 return null;
             }
 
-            // Verifikasi Password Signature: Jika password telah direset oleh Admin, cabut sesi lama
+            // Verifikasi Password Signature: Wajib ada dan cocok dengan hash terkini di database.
+            // Mencegah sesi lama aktif kembali: jika sesi tidak memiliki signature atau password telah direset,
+            // cabut sesi seketika (Strict Session Invalidation).
             $current_sig = substr($db_user['password_hash'], 0, 16);
-            if (isset($_SESSION['auth_hash_signature']) && $_SESSION['auth_hash_signature'] !== $current_sig) {
+            if (!isset($_SESSION['auth_hash_signature']) || $_SESSION['auth_hash_signature'] !== $current_sig) {
                 session_unset();
                 session_destroy();
                 $has_checked = true;
@@ -56,9 +58,6 @@ function current_user() {
             $_SESSION['role']         = $db_user['role'];
             $_SESSION['nama_lengkap'] = $db_user['nama_lengkap'];
             $_SESSION['username']     = $db_user['username'];
-            if (!isset($_SESSION['auth_hash_signature'])) {
-                $_SESSION['auth_hash_signature'] = $current_sig;
-            }
 
             $has_checked = true;
             $cached_user = [
