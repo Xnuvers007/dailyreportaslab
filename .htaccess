@@ -20,8 +20,8 @@ AddDefaultCharset UTF-8
     </IfModule>
 </FilesMatch>
 
-# Allow public SEO & PWA files: manifest.json, robots.txt, sitemap.xml
-<FilesMatch "^(manifest\.json|robots\.txt|sitemap\.xml)$">
+# Allow public SEO & PWA files: manifest.json, robots.txt, sitemap.xml, sw.js, offline.html
+<FilesMatch "^(manifest\.json|robots\.txt|sitemap\.xml|sw\.js|offline\.html)$">
     Order Allow,Deny
     Allow from all
     <IfModule mod_authz_core.c>
