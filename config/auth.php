@@ -73,15 +73,13 @@ function current_user() {
         }
     }
 
-    // Fallback jika database belum terhubung
+    // PRINSIP KEAMANAN FAIL-CLOSED (SECURE BY DEFAULT):
+    // Jika koneksi database terganggu atau query verifikasi gagal, TOLAK akses secara otomatis.
+    // Menolak mempercayai data sesi mentah tanpa konfirmasi integritas dari database aktif,
+    // mencegah sesi lama/usang mendapatkan hak akses terlindungi saat database bermasalah.
     $has_checked = true;
-    $cached_user = [
-        'id'           => (int)$_SESSION['user_id'],
-        'username'     => $_SESSION['username'] ?? '',
-        'nama_lengkap' => $_SESSION['nama_lengkap'] ?? '',
-        'role'         => $_SESSION['role'] ?? 'aslab'
-    ];
-    return $cached_user;
+    $cached_user = null;
+    return null;
 }
 
 function is_logged_in() {
