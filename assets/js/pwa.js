@@ -15,7 +15,11 @@
             // Hindari Service Worker pada iframe atau preview terbatas
             if (window.self !== window.top) return;
 
-            navigator.serviceWorker.register('sw.js')
+            // Daftarkan via sw.php gateway untuk kebal dari firewall/proxy hosting
+            navigator.serviceWorker.register('sw.php', { scope: './' })
+                .catch(function () {
+                    return navigator.serviceWorker.register('sw.js', { scope: './' });
+                })
                 .then(function (registration) {
                     // Update check otomatis
                     registration.onupdatefound = function () {
@@ -40,43 +44,46 @@
                          window.navigator.standalone === true;
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
-    // Panduan Khusus iOS Safari (karena iOS tidak mendukung event beforeinstallprompt)
-    if (isIOS && !isStandalone) {
+    // 3. Custom Install Prompt (Android, Chrome, Edge, iOS)
+    let deferredPrompt = null;
+
+    // Inisialisasi tombol pasang di navbar sedini mungkin
+    if (!isStandalone) {
         window.addEventListener('DOMContentLoaded', function () {
             const navBtn = document.getElementById('nav-install-btn');
             if (navBtn) {
                 navBtn.classList.remove('d-none');
                 navBtn.classList.add('d-inline-flex');
                 navBtn.addEventListener('click', function () {
-                    showPwaToast('📲 Di iPhone/iPad: Ketuk ikon Bagikan (Share) 📤 di Safari, lalu pilih "Tambahkan ke Layar Utama" ➕', 'info');
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        deferredPrompt.userChoice.then(function (choice) {
+                            if (choice && choice.outcome === 'accepted') {
+                                navBtn.classList.add('d-none');
+                                removePwaInstallBanner();
+                            }
+                            deferredPrompt = null;
+                        });
+                    } else if (isIOS) {
+                        showPwaToast('📲 Di iPhone/iPad: Ketuk tombol Bagikan (Share 📤) di Safari, lalu pilih "Tambahkan ke Layar Utama" ➕', 'info');
+                    } else {
+                        showPwaToast('💡 Untuk memasang aplikasi: Buka menu browser (titik tiga ⋮ di kanan atas) lalu klik "Pasang AslabReport" / "Install App" / "Tambahkan ke Layar Utama"', 'info');
+                    }
                 });
             }
         });
     }
-
-    // 3. Custom Install Prompt (Android, Chrome, Edge)
-    let deferredPrompt = null;
 
     window.addEventListener('beforeinstallprompt', function (e) {
         // Cegah mini-infobar default browser agar bisa pakai UI custom yang estetik
         e.preventDefault();
         deferredPrompt = e;
 
-        // Tampilkan tombol pasang di navbar jika ada
+        // Pastikan tombol di navbar tampil aktif
         const navBtn = document.getElementById('nav-install-btn');
         if (navBtn && !isStandalone) {
             navBtn.classList.remove('d-none');
             navBtn.classList.add('d-inline-flex');
-            navBtn.addEventListener('click', function () {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    deferredPrompt.userChoice.then(function () {
-                        deferredPrompt = null;
-                        navBtn.classList.add('d-none');
-                        removePwaInstallBanner();
-                    });
-                }
-            });
         }
 
         // Jangan tampilkan banner jika sudah di-dismiss dalam 7 hari terakhir

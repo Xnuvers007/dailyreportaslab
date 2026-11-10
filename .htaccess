@@ -10,8 +10,9 @@ AddDefaultCharset UTF-8
     RewriteRule ^(uploads|storage|config|includes)(/.*)?$ - [F,L,NC]
     RewriteRule ^(Dockerfile|docker-compose\.yml|router\.php|\.dockerignore|\.gitignore|\.env.*)$ - [F,L,NC]
     
-    # Route manifest.json ke manifest.php untuk kebal dari restriksi static json di hosting InfinityFree
+    # Route manifest.json ke manifest.php dan sw.js ke sw.php untuk kebal dari restriksi hosting InfinityFree
     RewriteRule ^manifest\.json$ manifest.php [L,QSA]
+    RewriteRule ^sw\.js$ sw.php [L,QSA]
 </IfModule>
 
 # MIME type untuk Manifest PWA & Service Worker
@@ -29,8 +30,8 @@ AddDefaultCharset UTF-8
     </IfModule>
 </FilesMatch>
 
-# Allow public SEO & PWA files: manifest.json, manifest.php, robots.txt, sitemap.xml, sw.js, offline.html
-<FilesMatch "^(manifest\.(json|php)|robots\.txt|sitemap\.xml|sw\.js|offline\.html)$">
+# Allow public SEO & PWA files: manifest.json, manifest.php, robots.txt, sitemap.xml, sw.js, sw.php, offline.html
+<FilesMatch "^(manifest\.(json|php)|robots\.txt|sitemap\.xml|sw\.(js|php)|offline\.html)$">
     Order Allow,Deny
     Allow from all
     <IfModule mod_authz_core.c>

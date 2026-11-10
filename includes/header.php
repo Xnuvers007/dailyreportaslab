@@ -62,7 +62,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET' && isset($page_action_map[$c
     <meta name="twitter:image" content="assets/img/logo-unpam.png">
     
     <!-- Favicon & PWA Settings -->
-    <link rel="manifest" href="manifest.json" crossorigin="use-credentials">
+    <link rel="manifest" href="manifest.php">
     <link rel="icon" type="image/png" sizes="32x32" href="assets/img/icons/icon-72.png">
     <link rel="icon" type="image/png" sizes="192x192" href="assets/img/icons/icon-192.png">
     <link rel="apple-touch-icon" sizes="180x180" href="assets/img/icons/apple-touch-icon.png">

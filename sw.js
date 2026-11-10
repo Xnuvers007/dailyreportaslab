@@ -14,7 +14,7 @@ const CACHE_NAME_STATIC = 'aslab-static-v1.1.0';
 // Aset Inti yang di-precache saat instalasi (Murni aset statis & halaman offline umum)
 const PRECACHE_ASSETS = [
     './offline.html',
-    './manifest.json',
+    './manifest.php',
     './assets/img/logo-unpam.png',
     './assets/img/icons/icon-72.png',
     './assets/img/icons/icon-96.png',
