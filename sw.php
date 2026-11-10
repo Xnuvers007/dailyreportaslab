@@ -22,3 +22,4 @@ if (file_exists($sw_path) && is_readable($sw_path)) {
     echo "console.error('[PWA ServiceWorker] File sw.js tidak ditemukan di server.');";
 }
 exit;
+

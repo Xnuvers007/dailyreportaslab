@@ -9,12 +9,11 @@
  *   TIDAK PERNAH menyimpan salinan respons halaman PHP dinamis atau data laporan terautentikasi ke cache browser.
  */
 
-const CACHE_NAME_STATIC = 'aslab-static-v1.1.0';
+const CACHE_NAME_STATIC = 'aslab-static-v1.1.1';
 
 // Aset Inti yang di-precache saat instalasi (Murni aset statis & halaman offline umum)
 const PRECACHE_ASSETS = [
     './offline.html',
-    './manifest.php',
     './assets/img/logo-unpam.png',
     './assets/img/icons/icon-72.png',
     './assets/img/icons/icon-96.png',
