@@ -36,9 +36,13 @@ try {
 
     if ($laporan) {
         $current_user = current_user();
-        // Kontrol Akses Berbasis Kepemilikan (Anti-IDOR): Hanya Admin atau pembuat laporan yang berhak menghapus
-        if (!is_admin() && !empty($laporan['user_id']) && (int)$laporan['user_id'] !== (int)$current_user['id']) {
-            set_flash('danger', "Akses ditolak. Anda hanya berhak menghapus laporan yang Anda buat sendiri. Hubungi Administrator jika perlu tindakan.");
+        
+        // HAK AKSES KHUSUS ADMINISTRATOR (INTEGRITAS ARSIP LABORATORIUM):
+        // Aslab biasa TIDAK DIIZINKAN menghapus laporan harian demi mencegah manipulasi data inventaris.
+        // Hanya role Administrator yang memiliki wewenang menghapus arsip resmi.
+        if (!is_admin()) {
+            record_log('UNAUTHORIZED_DELETE_ATTEMPT', "Percobaan hapus laporan ID #{$id} ({$laporan['petugas_nama']} - Shift {$laporan['shift']}) oleh non-admin ditolak", 'WARNING');
+            set_flash('danger', "Akses ditolak! Laporan inventaris resmi hanya dapat dihapus oleh Administrator demi menjaga integritas data.");
             header("Location: detail.php?id=" . (int)$id);
             exit;
         }

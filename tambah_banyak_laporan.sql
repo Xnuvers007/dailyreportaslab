@@ -90,3 +90,4 @@ ON DUPLICATE KEY UPDATE
   `proyektor_rusak` = VALUES(`proyektor_rusak`),
   `proyektor_catatan` = VALUES(`proyektor_catatan`),
   `catatan_umum` = VALUES(`catatan_umum`);
+

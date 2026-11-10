@@ -82,14 +82,16 @@ require_once __DIR__ . '/includes/header.php';
         </button>
         <?php if ($user): ?>
             <?php 
-            $can_modify = is_admin() || empty($laporan['user_id']) || ((int)$laporan['user_id'] === (int)$user['id']);
-            if ($can_modify): 
+            $can_edit = is_admin() || empty($laporan['user_id']) || ((int)$laporan['user_id'] === (int)$user['id']);
+            if ($can_edit): 
             ?>
                 <a href="edit-laporan.php?id=<?= (int)$laporan['id'] ?>" class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1">
                     <i class="fa-solid fa-pen-to-square"></i>
                     <span>Edit</span>
                 </a>
-                <button type="button" class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#deleteModal">
+            <?php endif; ?>
+            <?php if (is_admin()): ?>
+                <button type="button" class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#deleteModal" title="Hanya Administrator yang berhak menghapus arsip">
                     <i class="fa-solid fa-trash"></i>
                     <span>Hapus</span>
                 </button>
@@ -271,7 +273,8 @@ require_once __DIR__ . '/includes/header.php';
 
 </div>
 
-<!-- Delete Confirmation Modal -->
+<?php if (is_admin()): ?>
+<!-- Delete Confirmation Modal (Khusus Administrator) -->
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -299,6 +302,7 @@ require_once __DIR__ . '/includes/header.php';
         </div>
     </div>
 </div>
+<?php endif; ?>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
 
