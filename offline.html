@@ -9,18 +9,22 @@
     <script>
     (function() {
         try {
+            const baseDir = new URL('.', window.location.href).href;
+            const resolve = function(rel) {
+                return new URL(rel, baseDir).href;
+            };
             const m = {
                 "name": "AslabReport - Universitas Pamulang",
                 "short_name": "AslabReport",
                 "description": "Sistem Informasi Monitoring Inventaris & Laporan Harian Lab UNPAM",
-                "start_url": "index.php",
-                "scope": "./",
+                "start_url": resolve('index.php'),
+                "scope": resolve('./'),
                 "display": "standalone",
                 "background_color": "#0f172a",
                 "theme_color": "#ea580c",
                 "icons": [
-                    { "src": "assets/img/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
-                    { "src": "assets/img/icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+                    { "src": resolve('assets/img/icons/icon-192.png'), "sizes": "192x192", "type": "image/png" },
+                    { "src": resolve('assets/img/icons/icon-512.png'), "sizes": "512x512", "type": "image/png" }
                 ]
             };
             const b = new Blob([JSON.stringify(m)], { type: 'application/manifest+json' });
