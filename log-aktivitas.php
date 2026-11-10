@@ -205,9 +205,9 @@ require_once __DIR__ . '/includes/header.php';
                 <img src="assets/img/logo-unpam.png" alt="UNPAM" style="height: 18px; width: auto; object-fit: contain;">
                 <span>Sistem Keamanan & Audit Trail &bull; Universitas Pamulang</span>
             </div>
-            <h2 class="h3 fw-bold mb-1">
+            <h1 class="h3 fw-bold mb-1">
                 Pusat Log Aktivitas & Audit Keamanan
-            </h2>
+            </h1>
             <p class="text-muted small mb-0">
                 Pencatatan real-time seluruh aktivitas login, percobaan masuk, navigasi fitur, input & perubahan data dengan rotasi retensi otomatis 30 hari.
             </p>

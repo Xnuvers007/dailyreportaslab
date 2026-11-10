@@ -66,9 +66,9 @@ require_once __DIR__ . '/includes/header.php';
                 <li class="breadcrumb-item active" aria-current="page">Detail Laporan #<?= (int)$laporan['id'] ?></li>
             </ol>
         </nav>
-        <h3 class="h4 mb-0 fw-bold">
+        <h1 class="h4 mb-0 fw-bold">
             <i class="fa-solid fa-file-lines text-primary me-2"></i>Laporan <?= date('d F Y', strtotime($laporan['tanggal'])) ?>
-        </h3>
+        </h1>
     </div>
     
     <div class="d-flex flex-wrap gap-2">

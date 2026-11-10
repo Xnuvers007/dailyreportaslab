@@ -185,9 +185,9 @@ require_once __DIR__ . '/includes/header.php';
                     <i class="fa-solid fa-pen-to-square text-warning"></i>
                     <span>Mode Edit &bull; ID #<?= (int)$laporan['id'] ?></span>
                 </div>
-                <h2 class="h3 fw-bold mb-1">
+                <h1 class="h3 fw-bold mb-1">
                     Edit Laporan Harian Inventaris
-                </h2>
+                </h1>
                 <p class="text-muted small mb-0">
                     Perbarui data ketersediaan fisik kabel roll, unit proyektor, atau perbaiki catatan operasional aslab.
                 </p>

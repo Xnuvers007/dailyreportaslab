@@ -209,7 +209,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             <div class="mb-2">
                 <img src="assets/img/logo-unpam.png" alt="Logo Universitas Pamulang" class="img-fluid floating-icon" style="height: 64px; width: auto; object-fit: contain; filter: drop-shadow(0 4px 14px rgba(249, 115, 22, 0.35));">
             </div>
-            <h4 class="fw-bold mb-1 text-main">AslabReport</h4>
+            <h1 class="h4 fw-bold mb-1 text-main">AslabReport</h1>
             <p class="text-muted small mb-0 fw-semibold" style="letter-spacing: 0.03em;">UNIVERSITAS PAMULANG</p>
             <p class="text-muted small mb-0" style="font-size: 0.78rem;">Sistem Informasi Inventaris & Laporan Harian Lab</p>
         </div>

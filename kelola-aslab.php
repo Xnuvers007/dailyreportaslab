@@ -161,9 +161,9 @@ require_once __DIR__ . '/includes/header.php';
                 <img src="assets/img/logo-unpam.png" alt="UNPAM" style="height: 18px; width: auto; object-fit: contain;">
                 <span>Administrator Console &bull; Universitas Pamulang</span>
             </div>
-            <h2 class="h3 fw-bold mb-1">
+            <h1 class="h3 fw-bold mb-1">
                 Kelola Akun Asisten Laboratorium
-            </h2>
+            </h1>
             <p class="text-muted small mb-0">
                 Pusat manajemen hak akses, pendaftaran anggota aslab baru, dan keamanan autentikasi sistem.
             </p>

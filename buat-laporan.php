@@ -155,9 +155,9 @@ require_once __DIR__ . '/includes/header.php';
                     <img src="assets/img/logo-unpam.png" alt="UNPAM" style="height: 18px; width: auto; object-fit: contain;">
                     <span>Formulir Serah Terima Shift &bull; Lab TI UNPAM</span>
                 </div>
-                <h2 class="h3 fw-bold mb-1">
+                <h1 class="h3 fw-bold mb-1">
                     Input Laporan Harian Inventaris
-                </h2>
+                </h1>
                 <p class="text-muted small mb-0">
                     Catat ketersediaan fisik kabel roll, unit proyektor, dan catatan operasional shift sebelum perkuliahan dimulai.
                 </p>
