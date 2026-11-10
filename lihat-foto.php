@@ -60,14 +60,19 @@ if (!isset($allowed_mimes[$mime_type])) {
     die("Format file tidak diizinkan.");
 }
 
-// 5. Kirim Security Headers & Sajikan File
+// 5. Kirim Security & Anti-Cache Headers (OWASP Shared Computer Protection)
 session_write_close(); // Lepas session lock agar request halaman lain tidak terblokir saat file disajikan
 header("Content-Type: " . $mime_type);
 header("Content-Length: " . filesize($real_target));
 header("Content-Disposition: inline; filename=\"" . $safe_filename . "\"");
 header("X-Content-Type-Options: nosniff");
-header("Cache-Control: private, max-age=86400"); // Cache 1 hari untuk user terotentikasi
-header("Pragma: private");
+
+// KEAMANAN KOMPUTER BERSAMA (ANTI-LEAK PHOTO CACHE):
+// Wajib no-store agar foto dokumentasi inventaris privat TIDAK TERSIMPAN di disk cache komputer bersama/lab.
+// Setiap pembukaan foto harus selalu melalui otentikasi login aktif.
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
+header("Expires: 0");
 
 // Bersihkan output buffer sebelum kirim file biner
 if (ob_get_level()) {
