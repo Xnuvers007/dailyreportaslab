@@ -82,7 +82,8 @@ require_once __DIR__ . '/includes/header.php';
         </button>
         <?php if ($user): ?>
             <?php 
-            $can_edit = is_admin() || empty($laporan['user_id']) || ((int)$laporan['user_id'] === (int)$user['id']);
+            // Hanya Admin atau pemilik asli yang boleh mengedit. Laporan tanpa pemilik hanya boleh diedit oleh Administrator.
+            $can_edit = is_admin() || (!empty($laporan['user_id']) && (int)$laporan['user_id'] === (int)$user['id']);
             if ($can_edit): 
             ?>
                 <a href="edit-laporan.php?id=<?= (int)$laporan['id'] ?>" class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1">

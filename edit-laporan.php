@@ -29,11 +29,20 @@ $page_title = "Edit Laporan - " . date('d/m/Y', strtotime($laporan['tanggal']));
 $user = current_user();
 
 // Kontrol Akses Berbasis Kepemilikan (Anti-IDOR / Broken Access Control):
-// Hanya Admin atau petugas pembuat laporan yang berhak mengedit laporan ini.
-if (!is_admin() && !empty($laporan['user_id']) && (int)$laporan['user_id'] !== (int)$user['id']) {
-    set_flash('danger', "Akses ditolak. Anda hanya berhak mengedit laporan yang Anda buat sendiri. Hubungi Administrator jika perlu perubahan.");
-    header("Location: detail.php?id=" . (int)$id);
-    exit;
+// - Administrator berhak mengedit seluruh laporan (termasuk laporan tanpa pemilik).
+// - Aslab biasa HANYA berhak mengedit laporan yang dibuat oleh dirinya sendiri.
+// - Laporan tanpa pemilik (user_id kosong/NULL) HANYA dapat diedit oleh Administrator demi integritas data.
+if (!is_admin()) {
+    if (empty($laporan['user_id'])) {
+        set_flash('danger', "Akses ditolak. Laporan arsip tanpa pemilik/sistem ini hanya dapat diubah oleh Administrator.");
+        header("Location: detail.php?id=" . (int)$id);
+        exit;
+    }
+    if ((int)$laporan['user_id'] !== (int)$user['id']) {
+        set_flash('danger', "Akses ditolak. Anda hanya berhak mengedit laporan yang Anda buat sendiri. Hubungi Administrator jika perlu perubahan.");
+        header("Location: detail.php?id=" . (int)$id);
+        exit;
+    }
 }
 
 $errors = [];

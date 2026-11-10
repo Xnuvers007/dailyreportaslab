@@ -47,14 +47,15 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         if (empty($username) || empty($password)) {
             $error = "Silakan masukkan username dan password.";
         } else {
-            // RATE LIMITING & BRUTE-FORCE LOCKOUT CHECK (OWASP Compliant & Anti-DoS)
+            // RATE LIMITING & BRUTE-FORCE PROTECTION (OWASP ASVS & NIST 800-63B Compliant)
+            // Mencegah Brute-Force Password Guessing sekaligus Mencegah Account Lockout DoS terhadap pengguna yang sah
             $client_ip = get_client_ip();
             $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
             $time_sql = ($driver === 'sqlite') 
                 ? "created_at >= datetime('now', '-15 minutes')" 
                 : "created_at >= DATE_SUB(NOW(), INTERVAL 15 MINUTE)";
 
-            // A. Rate Limiting Tingkat IP (Mencegah bot, flood, & credential stuffing massal)
+            // A. Rate Limiting Tingkat IP (Mencegah bot, flood, credential stuffing, & DDoS)
             // Batasi maksimal 15 kegagalan dari IP yang sama dalam 15 menit
             $stmt_ip_rate = $pdo->prepare("SELECT COUNT(*) FROM `activity_logs` 
                 WHERE `ip_address` = :ip 
@@ -63,25 +64,32 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             $stmt_ip_rate->execute([':ip' => $client_ip]);
             $ip_failed_attempts = (int)$stmt_ip_rate->fetchColumn();
 
-            // B. Rate Limiting Tingkat Akun (Mencegah password guessing terarah ke akun tertentu)
-            // Batasi maksimal 5 kegagalan kata sandi yang valid CSRF-nya untuk username target
-            // PENTING: LOGIN_CSRF_FAILED TIDAK dihitung di sini agar akun korban tidak bisa di-DoS
-            $stmt_user_rate = $pdo->prepare("SELECT COUNT(*) FROM `activity_logs` 
-                WHERE `username` = :uname 
+            // Progressive Delay (Jeda Progresif): Memperlambat serangan otomatis secara eksponensial seiring bertambahnya kegagalan dari IP ini
+            if ($ip_failed_attempts > 2) {
+                usleep(min(1000000, 150000 + ($ip_failed_attempts * 100000))); // 0.35s s/d 1s delay
+            }
+
+            // B. Rate Limiting Kombinasi IP + Akun (Anti-Brute Force Spesifik Tanpa Mengunci Akun Secara Global)
+            // Sesuai rekomendasi OWASP & NIST: Penguncian diterapkan pada kombinasi IP Pengakses + Akun Target.
+            // Dengan cara ini, jika penyerang sengaja salah menebak 5x untuk akun korban, yang dibatasi HANYA koneksi penyerang.
+            // Pemilik akun asli dari koneksi/IP lain TIDAK AKAN ter-lockout (Mencegah Denial of Service terhadap korban).
+            $stmt_pair_rate = $pdo->prepare("SELECT COUNT(*) FROM `activity_logs` 
+                WHERE `ip_address` = :ip 
+                AND `username` = :uname 
                 AND `action` = 'LOGIN_FAILED' 
                 AND {$time_sql}");
-            $stmt_user_rate->execute([':uname' => $username]);
-            $user_failed_attempts = (int)$stmt_user_rate->fetchColumn();
+            $stmt_pair_rate->execute([':ip' => $client_ip, ':uname' => $username]);
+            $pair_failed_attempts = (int)$stmt_pair_rate->fetchColumn();
 
-            $max_user_attempts = 5;
+            $max_pair_attempts = 5;
             $max_ip_attempts   = 15;
 
             if ($ip_failed_attempts >= $max_ip_attempts) {
-                $error = "Terlalu banyak percobaan masuk dari koneksi/IP Anda ({$ip_failed_attempts}x). Akses login dibatasi sementara demi keamanan. Silakan coba kembali dalam 15 menit.";
+                $error = "Terlalu banyak percobaan masuk dari koneksi/IP Anda ({$ip_failed_attempts}x). Akses login dari koneksi Anda dibatasi sementara demi keamanan. Silakan coba kembali dalam 15 menit.";
                 record_log('LOGIN_RATE_LIMITED', "Akses login IP {$client_ip} dibatasi oleh Rate Limiter ({$ip_failed_attempts}x percobaan gagal)", 'DANGER', $username);
-            } elseif ($user_failed_attempts >= $max_user_attempts) {
-                $error = "Terlalu banyak percobaan kata sandi yang salah pada akun ini ({$user_failed_attempts}x). Akun dibekukan sementara demi keamanan. Silakan coba kembali dalam 15 menit.";
-                record_log('LOGIN_RATE_LIMITED', "Akun '{$username}' dibekukan sementara oleh Brute-force Guard ({$user_failed_attempts}x password salah)", 'DANGER', $username);
+            } elseif ($pair_failed_attempts >= $max_pair_attempts) {
+                $error = "Terlalu banyak percobaan kata sandi salah untuk akun ini dari koneksi Anda ({$pair_failed_attempts}x). Akses login ke akun ini dari perangkat/koneksi Anda dibatasi sementara demi keamanan. Silakan coba kembali dalam 15 menit.";
+                record_log('LOGIN_RATE_LIMITED', "Percobaan login akun '{$username}' dari IP {$client_ip} dibatasi ({$pair_failed_attempts}x password salah)", 'DANGER', $username);
             } else {
                 try {
                     $stmt = $pdo->prepare("SELECT * FROM `users` WHERE `username` = :username LIMIT 1");
@@ -110,8 +118,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                         header("Location: " . $redirect);
                         exit;
                     } else {
-                        $sisa = max(0, $max_user_attempts - ($user_failed_attempts + 1));
-                        $peringatan_sisa = ($sisa > 0) ? " Sisa percobaan: {$sisa}x sebelum akun dibekukan sementara." : "";
+                        $sisa = max(0, $max_pair_attempts - ($pair_failed_attempts + 1));
+                        $peringatan_sisa = ($sisa > 0) ? " Sisa percobaan dari koneksi ini: {$sisa}x." : "";
                         $error = "Username atau password yang Anda masukkan salah." . $peringatan_sisa;
                         record_log('LOGIN_FAILED', "Percobaan login gagal (password salah) untuk username '{$username}'", 'WARNING', $username);
                     }

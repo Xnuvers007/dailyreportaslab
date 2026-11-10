@@ -398,7 +398,7 @@ require_once __DIR__ . '/includes/header.php';
                                         <a href="detail.php?id=<?= (int)$row['id'] ?>" class="btn btn-outline-primary" title="Lihat Detail">
                                             <i class="fa-solid fa-eye"></i>
                                         </a>
-                                        <?php if (is_admin() || empty($row['user_id']) || ((int)$row['user_id'] === (int)$user['id'])): ?>
+                                        <?php if (is_admin() || (!empty($row['user_id']) && (int)$row['user_id'] === (int)$user['id'])): ?>
                                             <a href="edit-laporan.php?id=<?= (int)$row['id'] ?>" class="btn btn-outline-secondary" title="Edit">
                                                 <i class="fa-solid fa-pen-to-square"></i>
                                             </a>
