@@ -36,3 +36,4 @@ Disallow: /*?*action=*
 
 # Lokasi Sitemap Resmi
 Sitemap: https://dailyreportaslab.rf.gd/sitemap.xml
+

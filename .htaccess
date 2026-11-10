@@ -9,10 +9,19 @@ AddDefaultCharset UTF-8
     RewriteEngine On
     RewriteRule ^(uploads|storage|config|includes)(/.*)?$ - [F,L,NC]
     RewriteRule ^(Dockerfile|docker-compose\.yml|router\.php|\.dockerignore|\.gitignore|\.env.*)$ - [F,L,NC]
+    
+    # Route manifest.json ke manifest.php untuk kebal dari restriksi static json di hosting InfinityFree
+    RewriteRule ^manifest\.json$ manifest.php [L,QSA]
 </IfModule>
 
-# Protect sensitive files & databases
-<FilesMatch "(?i)^(Dockerfile|docker-compose\.yml|router\.php|\.dockerignore|\.gitignore|\.env.*)$|\.(sql|sqlite|db|env|ini|log|sh|bak|swp|md|json|lock|git.*|yml|yaml|example|config)$">
+# MIME type untuk Manifest PWA & Service Worker
+<IfModule mod_mime.c>
+    AddType application/manifest+json .json .webmanifest
+    AddType application/javascript .js
+</IfModule>
+
+# Protect sensitive files & databases (Catatan: file manifest.json tidak diblokir)
+<FilesMatch "(?i)^(Dockerfile|docker-compose\.yml|router\.php|composer\.json|package\.json|\.dockerignore|\.gitignore|\.env.*)$|\.(sql|sqlite|db|env|ini|log|sh|bak|swp|md|lock|git.*|yml|yaml|example|config)$">
     Order Deny,Allow
     Deny from all
     <IfModule mod_authz_core.c>
@@ -20,8 +29,8 @@ AddDefaultCharset UTF-8
     </IfModule>
 </FilesMatch>
 
-# Allow public SEO & PWA files: manifest.json, robots.txt, sitemap.xml, sw.js, offline.html
-<FilesMatch "^(manifest\.json|robots\.txt|sitemap\.xml|sw\.js|offline\.html)$">
+# Allow public SEO & PWA files: manifest.json, manifest.php, robots.txt, sitemap.xml, sw.js, offline.html
+<FilesMatch "^(manifest\.(json|php)|robots\.txt|sitemap\.xml|sw\.js|offline\.html)$">
     Order Allow,Deny
     Allow from all
     <IfModule mod_authz_core.c>
@@ -36,4 +45,3 @@ AddDefaultCharset UTF-8
     Header set X-XSS-Protection "1; mode=block"
     Header set Referrer-Policy "strict-origin-when-cross-origin"
 </IfModule>
-
