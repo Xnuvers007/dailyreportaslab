@@ -76,7 +76,11 @@ try {
             exit;
         }
 
-        // Hapus file fisik foto secara aman jika ada (Anti-Path-Traversal & Server-Agnostic Storage)
+        // Hapus record di database dengan Prepared Statement
+        $delete_stmt = $pdo->prepare("DELETE FROM `laporan` WHERE `id` = :id");
+        $delete_stmt->execute([':id' => $id]);
+
+        // Hapus file fisik foto secara aman hanya setelah record database berhasil dihapus (Integritas Transaksi)
         if (!empty($laporan['foto_dokumentasi'])) {
             $safe_filename = basename($laporan['foto_dokumentasi']);
             $uploads_dir   = get_uploads_directory();
@@ -86,10 +90,6 @@ try {
                 @unlink($real_file);
             }
         }
-
-        // Hapus record di database dengan Prepared Statement
-        $delete_stmt = $pdo->prepare("DELETE FROM `laporan` WHERE `id` = :id");
-        $delete_stmt->execute([':id' => $id]);
 
         // Catat ke audit log dengan detail laporan
         record_log('DELETE_REPORT', "Menghapus laporan ID #{$id} ({$laporan['petugas_nama']} - " . date('d/m/Y', strtotime($laporan['tanggal'])) . " Shift {$laporan['shift']})", 'DANGER');

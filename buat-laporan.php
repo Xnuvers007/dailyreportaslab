@@ -74,58 +74,70 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         $errors[] = "Format tanggal tidak valid.";
     }
 
-    // 4. Handle Upload Foto dengan Keamanan Ketat (Anti-RCE & Anti-Bypass)
-    $foto_filename = null;
-    if (isset($_FILES['foto_dokumentasi']) && $_FILES['foto_dokumentasi']['error'] !== UPLOAD_ERR_NO_FILE) {
-        try {
-            $foto_filename = handle_secure_upload($_FILES['foto_dokumentasi']);
-        } catch (Exception $e) {
-            $errors[] = "Gagal upload foto: " . $e->getMessage();
-        }
-    }
-
-    // 5. Simpan ke Database jika tidak ada error (Prepared Statement Anti-SQLi)
+    // 4. Operasi File & Penyimpanan Database
+    // KEAMANAN INTEGRITAS TRANSAKSI (ANTI-ORPHAN & VALIDATION-FIRST):
+    // Upload file fisik ke disk HANYA dijalankan jika seluruh validasi di atas (CSRF, shift, tanggal) lolos.
+    // Jika CSRF tidak valid atau input keliru, server TIDAK mengunggah file apa pun ke disk server.
     if (empty($errors)) {
-        try {
-            $sql = "INSERT INTO `laporan` (
-                        `user_id`, `tanggal`, `shift`, `petugas_nama`,
-                        `kabel_roll_tersedia`, `kabel_roll_rusak`, `kabel_roll_catatan`,
-                        `proyektor_tersedia`, `proyektor_rusak`, `proyektor_catatan`,
-                        `catatan_umum`, `foto_dokumentasi`
-                    ) VALUES (
-                        :user_id, :tanggal, :shift, :petugas_nama,
-                        :kabel_roll_tersedia, :kabel_roll_rusak, :kabel_roll_catatan,
-                        :proyektor_tersedia, :proyektor_rusak, :proyektor_catatan,
-                        :catatan_umum, :foto_dokumentasi
-                    )";
-            
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([
-                ':user_id'             => $user ? $user['id'] : null,
-                ':tanggal'             => $tanggal,
-                ':shift'               => $shift,
-                ':petugas_nama'        => $petugas_nama,
-                ':kabel_roll_tersedia' => $kabel_roll_tersedia,
-                ':kabel_roll_rusak'    => $kabel_roll_rusak,
-                ':kabel_roll_catatan'  => $kabel_roll_catatan ?: null,
-                ':proyektor_tersedia'  => $proyektor_tersedia,
-                ':proyektor_rusak'     => $proyektor_rusak,
-                ':proyektor_catatan'   => $proyektor_catatan ?: null,
-                ':catatan_umum'        => $catatan_umum ?: null,
-                ':foto_dokumentasi'    => $foto_filename
-            ]);
+        $foto_filename = null;
+        if (isset($_FILES['foto_dokumentasi']) && $_FILES['foto_dokumentasi']['error'] !== UPLOAD_ERR_NO_FILE) {
+            try {
+                $foto_filename = handle_secure_upload($_FILES['foto_dokumentasi']);
+            } catch (Exception $e) {
+                $errors[] = "Gagal upload foto: " . $e->getMessage();
+            }
+        }
 
-            $new_id = $pdo->lastInsertId();
-            
-            // Catat Log Audit Aktivitas
-            record_log('CREATE_REPORT', "Menginput laporan harian shift {$shift} (Kabel: {$kabel_roll_tersedia} siap, Proyektor: {$proyektor_tersedia} siap) ID #{$new_id}", 'SUCCESS');
+        if (empty($errors)) {
+            try {
+                $sql = "INSERT INTO `laporan` (
+                            `user_id`, `tanggal`, `shift`, `petugas_nama`,
+                            `kabel_roll_tersedia`, `kabel_roll_rusak`, `kabel_roll_catatan`,
+                            `proyektor_tersedia`, `proyektor_rusak`, `proyektor_catatan`,
+                            `catatan_umum`, `foto_dokumentasi`
+                        ) VALUES (
+                            :user_id, :tanggal, :shift, :petugas_nama,
+                            :kabel_roll_tersedia, :kabel_roll_rusak, :kabel_roll_catatan,
+                            :proyektor_tersedia, :proyektor_rusak, :proyektor_catatan,
+                            :catatan_umum, :foto_dokumentasi
+                        )";
+                
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([
+                    ':user_id'             => $user ? $user['id'] : null,
+                    ':tanggal'             => $tanggal,
+                    ':shift'               => $shift,
+                    ':petugas_nama'        => $petugas_nama,
+                    ':kabel_roll_tersedia' => $kabel_roll_tersedia,
+                    ':kabel_roll_rusak'    => $kabel_roll_rusak,
+                    ':kabel_roll_catatan'  => $kabel_roll_catatan ?: null,
+                    ':proyektor_tersedia'  => $proyektor_tersedia,
+                    ':proyektor_rusak'     => $proyektor_rusak,
+                    ':proyektor_catatan'   => $proyektor_catatan ?: null,
+                    ':catatan_umum'        => $catatan_umum ?: null,
+                    ':foto_dokumentasi'    => $foto_filename
+                ]);
 
-            set_flash('success', "Laporan harian shift {$shift} berhasil disimpan!");
-            header("Location: detail.php?id=" . (int)$new_id);
-            exit;
-        } catch (PDOException $e) {
-            error_log("Insert Laporan Error: " . $e->getMessage());
-            $errors[] = "Terjadi kesalahan sistem saat menyimpan laporan. Silakan coba kembali.";
+                $new_id = $pdo->lastInsertId();
+                
+                // Catat Log Audit Aktivitas
+                record_log('CREATE_REPORT', "Menginput laporan harian shift {$shift} (Kabel: {$kabel_roll_tersedia} siap, Proyektor: {$proyektor_tersedia} siap) ID #{$new_id}", 'SUCCESS');
+
+                set_flash('success', "Laporan harian shift {$shift} berhasil disimpan!");
+                header("Location: detail.php?id=" . (int)$new_id);
+                exit;
+            } catch (PDOException $e) {
+                // ROLLBACK FILE: Bersihkan file yang terlanjur diunggah jika simpan database gagal
+                if ($foto_filename) {
+                    $uploads_dir = get_uploads_directory();
+                    $orphan_file = $uploads_dir . DIRECTORY_SEPARATOR . basename($foto_filename);
+                    if (is_file($orphan_file)) {
+                        @unlink($orphan_file);
+                    }
+                }
+                error_log("Insert Laporan Error: " . $e->getMessage());
+                $errors[] = "Terjadi kesalahan sistem saat menyimpan laporan. Silakan coba kembali.";
+            }
         }
     }
 }

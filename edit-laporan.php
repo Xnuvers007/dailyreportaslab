@@ -88,81 +88,86 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         $errors[] = 'Tulisan konfirmasi salah! Harap ketik "KONFIRMASI" pada kolom konfirmasi untuk menyimpan perubahan.';
     }
 
-    $foto_filename = $laporan['foto_dokumentasi'];
+    // 4. Operasi File & Penyimpanan Database
+    // KEAMANAN INTEGRITAS TRANSAKSI (ANTI-ORPHAN & ANTI-PREMATURE DELETION):
+    // Operasi file fisik HANYA dijalankan jika seluruh validasi di atas (CSRF, format, konfirmasi) benar-benar lolos.
+    // Jika CSRF atau konfirmasi gagal, tidak ada file yang dihapus atau diunggah ke disk server!
+    if (empty($errors)) {
+        $uploads_dir = get_uploads_directory();
+        $new_foto_uploaded = null;
+        $foto_filename = $laporan['foto_dokumentasi'];
 
-    // Jika user mencentang hapus foto (Anti-Path-Traversal & Server-Agnostic Storage)
-    $uploads_dir = get_uploads_directory();
-    if ($hapus_foto && $foto_filename) {
-        $file_to_delete = $uploads_dir . DIRECTORY_SEPARATOR . basename($foto_filename);
-        $real_delete    = realpath($file_to_delete);
-        if ($real_delete && $uploads_dir && strpos($real_delete, $uploads_dir) === 0 && is_file($real_delete)) {
-            @unlink($real_delete);
+        // Jika user mengunggah foto baru
+        if (isset($_FILES['foto_dokumentasi']) && $_FILES['foto_dokumentasi']['error'] !== UPLOAD_ERR_NO_FILE) {
+            try {
+                $new_foto_uploaded = handle_secure_upload($_FILES['foto_dokumentasi']);
+                $foto_filename = $new_foto_uploaded;
+            } catch (Exception $e) {
+                $errors[] = "Gagal upload foto: " . $e->getMessage();
+            }
+        } elseif ($hapus_foto) {
+            $foto_filename = null;
         }
-        $foto_filename = null;
-    }
 
-    // Jika user mengunggah foto baru
-    if (isset($_FILES['foto_dokumentasi']) && $_FILES['foto_dokumentasi']['error'] !== UPLOAD_ERR_NO_FILE) {
-        try {
-            $new_foto = handle_secure_upload($_FILES['foto_dokumentasi']);
-            if ($new_foto) {
-                // Hapus foto lama jika ada secara aman
-                if (!empty($laporan['foto_dokumentasi'])) {
+        // Simpan ke database jika upload foto baru berhasil tanpa kendala
+        if (empty($errors)) {
+            try {
+                $sql = "UPDATE `laporan` SET
+                            `tanggal` = :tanggal,
+                            `shift` = :shift,
+                            `petugas_nama` = :petugas_nama,
+                            `kabel_roll_tersedia` = :kabel_roll_tersedia,
+                            `kabel_roll_rusak` = :kabel_roll_rusak,
+                            `kabel_roll_catatan` = :kabel_roll_catatan,
+                            `proyektor_tersedia` = :proyektor_tersedia,
+                            `proyektor_rusak` = :proyektor_rusak,
+                            `proyektor_catatan` = :proyektor_catatan,
+                            `catatan_umum` = :catatan_umum,
+                            `foto_dokumentasi` = :foto_dokumentasi
+                        WHERE `id` = :id";
+                
+                $stmt_update = $pdo->prepare($sql);
+                $stmt_update->execute([
+                    ':tanggal'             => $tanggal,
+                    ':shift'               => $shift,
+                    ':petugas_nama'        => $petugas_nama,
+                    ':kabel_roll_tersedia' => $kabel_roll_tersedia,
+                    ':kabel_roll_rusak'    => $kabel_roll_rusak,
+                    ':kabel_roll_catatan'  => $kabel_roll_catatan ?: null,
+                    ':proyektor_tersedia'  => $proyektor_tersedia,
+                    ':proyektor_rusak'     => $proyektor_rusak,
+                    ':proyektor_catatan'   => $proyektor_catatan ?: null,
+                    ':catatan_umum'        => $catatan_umum ?: null,
+                    ':foto_dokumentasi'    => $foto_filename,
+                    ':id'                  => $id
+                ]);
+
+                // Database berhasil diperbarui! Baru sekarang kita hapus foto lama secara aman dari disk
+                if (($new_foto_uploaded || $hapus_foto) && !empty($laporan['foto_dokumentasi'])) {
                     $old_file = $uploads_dir . DIRECTORY_SEPARATOR . basename($laporan['foto_dokumentasi']);
                     $real_old = realpath($old_file);
                     if ($real_old && $uploads_dir && strpos($real_old, $uploads_dir) === 0 && is_file($real_old)) {
                         @unlink($real_old);
                     }
                 }
-                $foto_filename = $new_foto;
+
+                // Catat log audit aktivitas
+                record_log('UPDATE_REPORT', "Memperbarui laporan shift {$shift} tanggal " . date('d/m/Y', strtotime($tanggal)) . " (ID #{$id})", 'SUCCESS');
+
+                set_flash('success', "Laporan tanggal " . date('d/m/Y', strtotime($tanggal)) . " berhasil diperbarui.");
+                header("Location: detail.php?id=" . (int)$id);
+                exit;
+            } catch (PDOException $e) {
+                // ROLLBACK FILE: Jika simpan database gagal, bersihkan foto baru agar tidak menjadi file yatim (orphan) di disk
+                if ($new_foto_uploaded) {
+                    $orphan_file = $uploads_dir . DIRECTORY_SEPARATOR . basename($new_foto_uploaded);
+                    if (is_file($orphan_file)) {
+                        @unlink($orphan_file);
+                    }
+                }
+                error_log("Update Laporan Error: " . $e->getMessage());
+                $errors[] = "Gagal memperbarui data laporan ke database. Silakan coba lagi.";
             }
-        } catch (Exception $e) {
-            $errors[] = "Gagal upload foto: " . $e->getMessage();
-        }
-    }
-
-    // 4. Update Database
-    if (empty($errors)) {
-        try {
-            $sql = "UPDATE `laporan` SET
-                        `tanggal` = :tanggal,
-                        `shift` = :shift,
-                        `petugas_nama` = :petugas_nama,
-                        `kabel_roll_tersedia` = :kabel_roll_tersedia,
-                        `kabel_roll_rusak` = :kabel_roll_rusak,
-                        `kabel_roll_catatan` = :kabel_roll_catatan,
-                        `proyektor_tersedia` = :proyektor_tersedia,
-                        `proyektor_rusak` = :proyektor_rusak,
-                        `proyektor_catatan` = :proyektor_catatan,
-                        `catatan_umum` = :catatan_umum,
-                        `foto_dokumentasi` = :foto_dokumentasi
-                    WHERE `id` = :id";
-            
-            $stmt_update = $pdo->prepare($sql);
-            $stmt_update->execute([
-                ':tanggal'             => $tanggal,
-                ':shift'               => $shift,
-                ':petugas_nama'        => $petugas_nama,
-                ':kabel_roll_tersedia' => $kabel_roll_tersedia,
-                ':kabel_roll_rusak'    => $kabel_roll_rusak,
-                ':kabel_roll_catatan'  => $kabel_roll_catatan ?: null,
-                ':proyektor_tersedia'  => $proyektor_tersedia,
-                ':proyektor_rusak'     => $proyektor_rusak,
-                ':proyektor_catatan'   => $proyektor_catatan ?: null,
-                ':catatan_umum'        => $catatan_umum ?: null,
-                ':foto_dokumentasi'    => $foto_filename,
-                ':id'                  => $id
-            ]);
-
-            // Catat log audit aktivitas
-            record_log('UPDATE_REPORT', "Memperbarui laporan shift {$shift} tanggal " . date('d/m/Y', strtotime($tanggal)) . " (ID #{$id})", 'SUCCESS');
-
-            set_flash('success', "Laporan tanggal " . date('d/m/Y', strtotime($tanggal)) . " berhasil diperbarui.");
-            header("Location: detail.php?id=" . (int)$id);
-            exit;
-        } catch (PDOException $e) {
-            error_log("Update Laporan Error: " . $e->getMessage());
-            $errors[] = "Gagal memperbarui data laporan. Silakan coba lagi.";
         }
     }
 }
