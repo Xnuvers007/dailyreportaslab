@@ -3,13 +3,20 @@
  * Modul Keamanan: Anti-XSS, Anti-CSRF, Anti-RCE, & Secure File Upload
  */
 
-// Kirim Security Headers standar
+// Kirim Security & Anti-Cache Headers standar untuk halaman dinamis PHP
 function send_security_headers() {
     if (!headers_sent()) {
         header("X-Content-Type-Options: nosniff");
         header("X-Frame-Options: SAMEORIGIN");
         header("X-XSS-Protection: 1; mode=block");
         header("Referrer-Policy: strict-origin-when-cross-origin");
+
+        // KEAMANAN KOMPUTER BERSAMA (OWASP Shared Computer Protection):
+        // Cegah penyimpanan respons dinamis di disk/browser cache agar data laporan & sesi
+        // tidak tertinggal setelah logout atau diakses saat komputer bersama dalam keadaan offline.
+        header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+        header("Pragma: no-cache");
+        header("Expires: 0");
     }
 }
 

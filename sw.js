@@ -1,17 +1,17 @@
 /**
  * ASLAB REPORT - PROGRESSIVE WEB APP (PWA) SERVICE WORKER
- * Versi: v1.0.0
- * Strategi:
- * - Pre-cache Static Assets (Vendor CSS, JS, Three.js, Fonts, Icons)
- * - Stale-While-Revalidate untuk Static Assets (Super Cepat & Selalu Update)
- * - Network-First dengan Fallback ke offline.html untuk Navigasi Halaman PHP
- * - Keamanan: Memisahkan session dinamis & bypass upload/auth
+ * Versi: v1.1.0
+ * Strategi Keamanan & Kinerja:
+ * - Pre-cache Static Assets (Vendor CSS, JS, Three.js, Fonts, Icons, offline.html)
+ * - Stale-While-Revalidate murni untuk Static Assets (Super Cepat & Selalu Update)
+ * - Network-Only dengan Fallback ke offline.html untuk Navigasi Halaman Dinamis PHP
+ * - KEAMANAN KOMPUTER BERSAMA (OWASP Anti-Session Exposure):
+ *   TIDAK PERNAH menyimpan salinan respons halaman PHP dinamis atau data laporan terautentikasi ke cache browser.
  */
 
-const CACHE_NAME_STATIC = 'aslab-static-v1.0.0';
-const CACHE_NAME_RUNTIME = 'aslab-runtime-v1.0.0';
+const CACHE_NAME_STATIC = 'aslab-static-v1.1.0';
 
-// Aset Inti yang di-precache saat instalasi
+// Aset Inti yang di-precache saat instalasi (Murni aset statis & halaman offline umum)
 const PRECACHE_ASSETS = [
     './offline.html',
     './manifest.json',
@@ -60,15 +60,15 @@ self.addEventListener('install', (event) => {
     );
 });
 
-// 2. ACTIVATE EVENT (Pembersihan Cache Versi Lama)
+// 2. ACTIVATE EVENT (Pembersihan Semua Cache Lama & Runtime Cache Pengguna)
 self.addEventListener('activate', (event) => {
-    const currentCaches = [CACHE_NAME_STATIC, CACHE_NAME_RUNTIME];
+    const allowedCaches = [CACHE_NAME_STATIC];
     event.waitUntil(
         caches.keys().then((cacheNames) => {
             return Promise.all(
                 cacheNames.map((cacheName) => {
-                    if (!currentCaches.includes(cacheName)) {
-                        console.log('[PWA ServiceWorker] Menghapus cache lama:', cacheName);
+                    if (!allowedCaches.includes(cacheName)) {
+                        console.log('[PWA ServiceWorker] Menghapus cache lama/runtime:', cacheName);
                         return caches.delete(cacheName);
                     }
                 })
@@ -77,7 +77,20 @@ self.addEventListener('activate', (event) => {
     );
 });
 
-// 3. FETCH EVENT
+// 3. MESSAGE EVENT (Penanganan Perintah Pembersihan Sesi dari Client)
+self.addEventListener('message', (event) => {
+    if (event.data && (event.data.action === 'CLEAR_USER_CACHE' || event.data.action === 'LOGOUT')) {
+        caches.keys().then((cacheNames) => {
+            cacheNames.forEach((name) => {
+                if (name !== CACHE_NAME_STATIC) {
+                    caches.delete(name);
+                }
+            });
+        });
+    }
+});
+
+// 4. FETCH EVENT
 self.addEventListener('fetch', (event) => {
     const request = event.request;
     const url = new URL(request.url);
@@ -87,35 +100,22 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // Bypass ServiceWorker untuk streaming otentikasi foto privat & aksi logout
-    if (url.pathname.includes('lihat-foto.php') || url.pathname.includes('logout.php')) {
+    // Bypass ServiceWorker untuk streaming otentikasi foto privat, file unduhan, & aksi logout
+    if (
+        url.pathname.includes('lihat-foto.php') ||
+        url.pathname.includes('logout.php') ||
+        url.pathname.includes('export-laporan.php')
+    ) {
         return;
     }
 
-    // A. Strategi untuk Navigasi Halaman HTML / PHP (Network-First dengan Offline Fallback)
+    // A. Strategi Navigasi Halaman PHP / HTML (Network-Only dengan Fallback ke offline.html)
+    // KEAMANAN KOMPUTER BERSAMA (Anti-Session Exposure on Shared Devices):
+    // Jangan pernah menyimpan respons halaman PHP dinamis atau data laporan ke cache runtime.
+    // Jika offline, sajikan halaman aman offline.html tanpa membocorkan data sesi pengguna sebelumnya.
     if (request.mode === 'navigate') {
         event.respondWith(
-            fetch(request)
-                .then((networkResponse) => {
-                    // Simpan salinan di cache runtime jika status 200 OK
-                    if (networkResponse && networkResponse.status === 200) {
-                        const responseClone = networkResponse.clone();
-                        caches.open(CACHE_NAME_RUNTIME).then((cache) => {
-                            cache.put(request, responseClone);
-                        });
-                    }
-                    return networkResponse;
-                })
-                .catch(() => {
-                    // Jika offline, coba ambil dari cache terlebih dahulu
-                    return caches.match(request).then((cachedResponse) => {
-                        if (cachedResponse) {
-                            return cachedResponse;
-                        }
-                        // Jika tidak ada di cache, tampilkan offline.html yang informatif
-                        return caches.match('./offline.html');
-                    });
-                })
+            fetch(request).catch(() => caches.match('./offline.html'))
         );
         return;
     }
@@ -147,9 +147,8 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // C. Default: Network dengan Cache Fallback
+    // C. Default: Network dengan Fallback Offline
     event.respondWith(
         fetch(request).catch(() => caches.match(request))
     );
 });
-

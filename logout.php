@@ -44,6 +44,11 @@ if (ini_get("session.use_cookies")) {
 // Hancurkan sesi di server
 session_destroy();
 
+// Kirim header pembersihan cache browser saat logout (W3C Clear-Site-Data Standard)
+if (!headers_sent()) {
+    header("Clear-Site-Data: \"cache\", \"storage\"");
+}
+
 // Mulai sesi baru untuk pesan flash
 start_secure_session();
 require_once __DIR__ . '/config/auth.php';
